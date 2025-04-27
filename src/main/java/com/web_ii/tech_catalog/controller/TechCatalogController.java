@@ -31,7 +31,7 @@ import com.web_ii.tech_catalog.service.TechCatalogService;
         }
 
         @PostMapping("/techcatalog/save")
-        public String postMethodName(@ModelAttribute("techcatalog") TechCatalog techcatalog) {
+        public String postMethodName(@ModelAttribute TechCatalog techcatalog) {
             techCatalogService.saveTechCatalog(techcatalog);
             return "redirect:/techcatalog";
         }
@@ -41,4 +41,11 @@ import com.web_ii.tech_catalog.service.TechCatalogService;
             this.techCatalogService.deleteTechCatalogById(id);
             return "redirect:/techcatalog";
         }
+
+        @GetMapping("/techcatalog/edit/{id}")
+     public String edit(@PathVariable Long id, Model model) {
+         TechCatalog techcatalog = techCatalogService.getTechCatalogById(id);
+         model.addAttribute("techcatalog", techcatalog);
+         return "techcatalog/edit";
+     }
     }

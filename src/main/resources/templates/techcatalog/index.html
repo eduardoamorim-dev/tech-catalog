@@ -8,48 +8,180 @@
 
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
     integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
 </head>
 
-<body>
-  <a th:href="@{/techcatalog/create}">Cadastrar Eletrônico</a>
+<body class="bg-light">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+    <div class="container">
+      <a class="navbar-brand" href="#">Tech Catalog</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" title="Menu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item active">
+            <a class="nav-link" th:href="@{/techcatalog}">Listagem</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" th:href="@{/techcatalog/create}">Novo Cadastro</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
   <div class="container">
-    <h1>Listagem de Eletrônicos</h1>
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th scope="col">Código</th>
-          <th scope="col">Título</th>
-          <th scope="col">Valor Base</th>
-          <th scope="col">Categoria</th>
-          <th scope="col">Fabricante</th>
-          <th scope="col">Nível de Estoque</th>
-          <th scope="col">Estado</th>
-          <th scope="col">Prioridade</th>
-          <th scope="col">Recursos Adicionais</th>
-          <th scope="col">Locais Disponíveis</th>
-          <th scope="col">Especificação Técnica</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr th:each="eletronicos : ${eletronicosList}">
-          <td scope="row" th:text="${eletronicos.codigo}"></td>
-          <td scope="row" th:text="${eletronicos.titulo}"></td>
-          <td scope="row" th:text="${eletronicos.valorBase}"></td>
-          <td scope="row" th:text="${eletronicos.categoria}"></td>
-          <td scope="row" th:text="${eletronicos.fabricante}"></td>
-          <td scope="row" th:text="${eletronicos.nivelEstoque}"></td>
-          <td scope="row" th:text="${eletronicos.estado}"></td>
-          <td scope="row" th:text="${eletronicos.prioridade}"></td>
-          <td scope="row" th:text="${eletronicos.recursosAdicionais}"></td>
-          <td scope="row" th:text="${eletronicos.locaisDisponiveis}"></td>
-          <td scope="row" th:text="${eletronicos.especificacaoTecnica}"></td>
-          <td>
-            <a th:href="@{/techcatalog/delete/{id}(id=${eletronicos.id})}">Deletar</a>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h2 class="card-title mb-0">Listagem de Eletrônicos</h2>
+          <a th:href="@{/techcatalog/create}" class="btn btn-primary">
+            <i class="fas fa-plus mr-1"></i> Cadastrar Eletrônico
+          </a>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-striped table-hover">
+            <thead class="thead-dark">
+              <tr>
+                <th scope="col">Código</th>
+                <th scope="col">Título</th>
+                <th scope="col">Valor Base</th>
+                <th scope="col">Categoria</th>
+                <th scope="col">Fabricante</th>
+                <th scope="col">Estoque</th>
+                <th scope="col">Estado</th>
+                <th scope="col">Prioridade</th>
+                <th scope="col" class="text-center">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="eletronicos : ${eletronicosList}">
+                <td th:text="${eletronicos.codigo}"></td>
+                <td th:text="${eletronicos.titulo}"></td>
+                <td th:text="${'R$ ' + #numbers.formatDecimal(eletronicos.valorBase, 1, 'POINT', 2, 'COMMA')}"></td>
+                <td th:text="${eletronicos.categoria}"></td>
+                <td th:text="${eletronicos.fabricante}"></td>
+                <td>
+                  <span
+                    th:class="${eletronicos.nivelEstoque == 'Alto' ? 'badge badge-success' : 
+                                  (eletronicos.nivelEstoque == 'Médio' ? 'badge badge-primary' : 
+                                  (eletronicos.nivelEstoque == 'Baixo' ? 'badge badge-warning' : 'badge badge-danger'))}"
+                    th:text="${eletronicos.nivelEstoque}">
+                  </span>
+                </td>
+                <td th:text="${eletronicos.estado}"></td>
+                <td>
+                  <span th:class="${eletronicos.prioridade == 'Alta' ? 'badge badge-danger' : 
+                                  (eletronicos.prioridade == 'Média' ? 'badge badge-warning' : 'badge badge-info')}"
+                    th:text="${eletronicos.prioridade}">
+                  </span>
+                </td>
+                <td class="text-center">
+                  <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-sm btn-info" data-toggle="modal" title="Detalhes"
+                      th:data-target="${'#detalhesModal-' + eletronicos.id}">
+                      <i class="fas fa-eye"></i>
+                    </button>
+                    <a th:href="@{/techcatalog/edit/{id}(id=${eletronicos.id})}" class="btn btn-sm btn-warning">
+                      <i class="fas fa-edit"></i>
+                    </a>
+                    <a th:href="@{/techcatalog/delete/{id}(id=${eletronicos.id})}" class="btn btn-sm btn-danger"
+                      onclick="return confirm('Tem certeza que deseja excluir este item?')">
+                      <i class="fas fa-trash"></i>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+              <tr th:if="${#lists.isEmpty(eletronicosList)}">
+                <td colspan="9" class="text-center">Nenhum eletrônico cadastrado.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </div>
+
+  <!-- Modais de Detalhes -->
+  <div th:each="eletronicos : ${eletronicosList}" th:id="${'detalhesModal-' + eletronicos.id}" class="modal fade">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-info text-white">
+          <h5 class="modal-title">Detalhes do Eletrônico</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-6">
+              <h5>Informações Básicas</h5>
+              <dl class="row">
+                <dt class="col-sm-4">Código:</dt>
+                <dd class="col-sm-8" th:text="${eletronicos.codigo}"></dd>
+
+                <dt class="col-sm-4">Título:</dt>
+                <dd class="col-sm-8" th:text="${eletronicos.titulo}"></dd>
+
+                <dt class="col-sm-4">Valor Base:</dt>
+                <dd class="col-sm-8"
+                  th:text="${'R$ ' + #numbers.formatDecimal(eletronicos.valorBase, 1, 'POINT', 2, 'COMMA')}"></dd>
+
+                <dt class="col-sm-4">Categoria:</dt>
+                <dd class="col-sm-8" th:text="${eletronicos.categoria}"></dd>
+
+                <dt class="col-sm-4">Fabricante:</dt>
+                <dd class="col-sm-8" th:text="${eletronicos.fabricante}"></dd>
+
+                <dt class="col-sm-4">Nível Estoque:</dt>
+                <dd class="col-sm-8" th:text="${eletronicos.nivelEstoque}"></dd>
+              </dl>
+            </div>
+            <div class="col-md-6">
+              <h5>Informações Adicionais</h5>
+              <dl class="row">
+                <dt class="col-sm-4">Estado:</dt>
+                <dd class="col-sm-8" th:text="${eletronicos.estado}"></dd>
+
+                <dt class="col-sm-4">Prioridade:</dt>
+                <dd class="col-sm-8" th:text="${eletronicos.prioridade}"></dd>
+
+                <dt class="col-sm-4">Recursos:</dt>
+                <dd class="col-sm-8" th:text="${eletronicos.recursosAdicionais}"></dd>
+
+                <dt class="col-sm-4">Locais:</dt>
+                <dd class="col-sm-8" th:text="${eletronicos.locaisDisponiveis}"></dd>
+              </dl>
+            </div>
+          </div>
+
+          <div class="row mt-3">
+            <div class="col-12">
+              <h5>Especificação Técnica</h5>
+              <p th:text="${eletronicos.especificacaoTecnica}" class="border p-3 bg-light"></p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <a th:href="@{/techcatalog/edit/{id}(id=${eletronicos.id})}" class="btn btn-warning">Editar</a>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts JavaScript do Bootstrap -->
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+    integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+    integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+    crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+    integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+    crossorigin="anonymous"></script>
 </body>
 
 </html>
