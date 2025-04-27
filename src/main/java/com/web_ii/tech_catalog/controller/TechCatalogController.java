@@ -4,11 +4,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import com.web_ii.tech_catalog.models.TechCatalog;
 import com.web_ii.tech_catalog.service.TechCatalogService;
+
 
 
 
@@ -32,6 +33,12 @@ import com.web_ii.tech_catalog.service.TechCatalogService;
         @PostMapping("/techcatalog/save")
         public String postMethodName(@ModelAttribute("techcatalog") TechCatalog techcatalog) {
             techCatalogService.saveTechCatalog(techcatalog);
+            return "redirect:/techcatalog";
+        }
+
+        @GetMapping("/techcatalog/delete/{id}")
+        public String delete(@PathVariable Long id) {
+            this.techCatalogService.deleteTechCatalogById(id);
             return "redirect:/techcatalog";
         }
     }
