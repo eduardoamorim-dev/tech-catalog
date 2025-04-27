@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.GetMapping;
   public class TechCatalogController {
       @GetMapping("/techcatalog")
       public String getMethodName() {
-          System.out.println("Teste");
           return "techcatalog/index";
       }
   }
