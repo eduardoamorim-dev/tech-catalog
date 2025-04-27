@@ -6,7 +6,7 @@ import java.util.List;
     
     public interface TechCatalogService {
         List <TechCatalog> getAllTechCatalog();
-        void saveTechCatalog(TechCatalog product);
+        void saveTechCatalog(TechCatalog techcatalog);
         TechCatalog getTechCatalogById(long id);
         void deleteTechCatalogById(long id);
     }  
