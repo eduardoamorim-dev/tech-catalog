@@ -1,11 +1,54 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tech Catalog</title>
-</head>
-<body>
-  <h1>Bem-vindo à página de Catalogo Eletronico!</h1>
-</body>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Listagem de Eletrônicos</title>
+
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+      integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+      crossorigin="anonymous"
+    />
+  </head>
+
+  <body>
+
+    <div class="container">
+      <h1>Listagem de Eletrônicos</h1>
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th scope="col">Código</th>
+            <th scope="col">Título</th>
+            <th scope="col">Valor Base</th>
+            <th scope="col">Categoria</th>
+            <th scope="col">Fabricante</th>
+            <th scope="col">Nível de Estoque</th>
+            <th scope="col">Estado</th>
+            <th scope="col">Prioridade</th>
+            <th scope="col">Recursos Adicionais</th>
+            <th scope="col">Locais Disponíveis</th>
+            <th scope="col">Especificação Técnica</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="eletronicos : ${eletronicosList}">
+            <td scope="row" th:text="${eletronicos.codigo}"></td>
+            <td scope="row" th:text="${eletronicos.titulo}"></td>
+            <td scope="row" th:text="${eletronicos.valorBase}"></td>
+            <td scope="row" th:text="${eletronicos.categoria}"></td>
+            <td scope="row" th:text="${eletronicos.fabricante}"></td>
+            <td scope="row" th:text="${eletronicos.nivelEstoque}"></td>
+            <td scope="row" th:text="${eletronicos.estado}"></td>
+            <td scope="row" th:text="${eletronicos.prioridade}"></td>
+            <td scope="row" th:text="${eletronicos.recursosAdicionais}"></td>
+            <td scope="row" th:text="${eletronicos.locaisDisponiveis}"></td>
+            <td scope="row" th:text="${eletronicos.especificacaoTecnica}"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </body>
 </html>
