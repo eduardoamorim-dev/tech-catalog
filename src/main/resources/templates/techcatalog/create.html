@@ -15,14 +15,16 @@
       border-radius: 5px;
       padding: 20px;
       margin-bottom: 20px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
+
     .section-title {
       border-bottom: 2px solid #007bff;
       padding-bottom: 10px;
       margin-bottom: 20px;
       color: #343a40;
     }
+
     .back-button {
       position: fixed;
       bottom: 30px;
@@ -34,7 +36,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     }
   </style>
 </head>
@@ -89,19 +91,20 @@
                 <label for="codigo">
                   <i class="fas fa-barcode mr-1"></i> Código
                 </label>
-                <input type="text" th:field="*{codigo}" class="form-control" id="codigo" 
-                  placeholder="Digite o código do produto" required>
+                <input type="text" th:field="*{codigo}" class="form-control" id="codigo"
+                  placeholder="Digite o código do produto">
               </div>
-              
+
               <div class="form-group col-md-8">
                 <label for="titulo">
                   <i class="fas fa-tag mr-1"></i> Título
                 </label>
-                <input type="text" th:field="*{titulo}" class="form-control" id="titulo" 
-                  placeholder="Digite o título/nome do produto" required>
+                <input type="text" th:field="*{titulo}" th:errorclass="is-invalid" class="form-control" id="titulo"
+                  placeholder="Digite o título/nome do produto">
+                <span th:if="${#fields.hasErrors('titulo')}" th:errors="*{titulo}" class="text-danger"></span>
               </div>
             </div>
-            
+
             <div class="form-row">
               <div class="form-group col-md-4">
                 <label for="valorBase">
@@ -111,16 +114,17 @@
                   <div class="input-group-prepend">
                     <span class="input-group-text">R$</span>
                   </div>
-                  <input type="number" th:field="*{valorBase}" class="form-control" id="valorBase" 
-                    step="0.01" placeholder="0,00">
+                  <input type="number" th:field="*{valorBase}" th:errorclass="is-invalid" class="form-control"
+                    id="valorBase" step="0.01" placeholder="0,00">
                 </div>
+                <span th:if="${#fields.hasErrors('valorBase')}" th:errors="*{valorBase}" class="text-danger"></span>
               </div>
-              
+
               <div class="form-group col-md-4">
                 <label for="categoria">
                   <i class="fas fa-clipboard-list mr-1"></i> Categoria
                 </label>
-                <select id="categoria" th:field="*{categoria}" class="form-control">
+                <select id="categoria" th:field="*{categoria}" th:errorclass="is-invalid" class="form-control">
                   <option value="">Selecione uma categoria</option>
                   <option value="Smartphone">Smartphone</option>
                   <option value="Notebook">Notebook</option>
@@ -129,8 +133,9 @@
                   <option value="Áudio">Áudio</option>
                   <option value="Acessórios">Acessórios</option>
                 </select>
+                <span th:if="${#fields.hasErrors('categoria')}" th:errors="*{categoria}" class="text-danger"></span>
               </div>
-              
+
               <div class="form-group col-md-4">
                 <label for="fabricante">
                   <i class="fas fa-industry mr-1"></i> Fabricante
@@ -148,7 +153,7 @@
               </div>
             </div>
           </div>
-          
+
           <!-- Seção de Status e Prioridade -->
           <div class="form-section">
             <h4 class="section-title">Status e Prioridade</h4>
@@ -165,47 +170,46 @@
                   <option value="Esgotado">Esgotado</option>
                 </select>
               </div>
-              
+
               <div class="form-group col-md-4">
                 <label>
                   <i class="fas fa-check-circle mr-1"></i> Estado
                 </label>
                 <div>
                   <div class="custom-control custom-radio custom-control-inline">
-                    <input type="radio" th:field="*{estado}" id="estadoNovo" value="Novo" 
-                      class="custom-control-input">
+                    <input type="radio" th:field="*{estado}" id="estadoNovo" value="Novo" class="custom-control-input">
                     <label class="custom-control-label" for="estadoNovo">Novo</label>
                   </div>
                   <div class="custom-control custom-radio custom-control-inline">
-                    <input type="radio" th:field="*{estado}" id="estadoUsado" value="Usado" 
+                    <input type="radio" th:field="*{estado}" id="estadoUsado" value="Usado"
                       class="custom-control-input">
                     <label class="custom-control-label" for="estadoUsado">Usado</label>
                   </div>
                   <div class="custom-control custom-radio custom-control-inline">
-                    <input type="radio" th:field="*{estado}" id="estadoRecondicionado" value="Recondicionado" 
+                    <input type="radio" th:field="*{estado}" id="estadoRecondicionado" value="Recondicionado"
                       class="custom-control-input">
                     <label class="custom-control-label" for="estadoRecondicionado">Recondicionado</label>
                   </div>
                 </div>
               </div>
-              
+
               <div class="form-group col-md-4">
                 <label>
                   <i class="fas fa-flag mr-1"></i> Prioridade
                 </label>
                 <div>
                   <div class="custom-control custom-radio custom-control-inline">
-                    <input type="radio" th:field="*{prioridade}" id="prioridadeAlta" value="Alta" 
+                    <input type="radio" th:field="*{prioridade}" id="prioridadeAlta" value="Alta"
                       class="custom-control-input">
                     <label class="custom-control-label" for="prioridadeAlta">Alta</label>
                   </div>
                   <div class="custom-control custom-radio custom-control-inline">
-                    <input type="radio" th:field="*{prioridade}" id="prioridadeMedia" value="Média" 
+                    <input type="radio" th:field="*{prioridade}" id="prioridadeMedia" value="Média"
                       class="custom-control-input">
                     <label class="custom-control-label" for="prioridadeMedia">Média</label>
                   </div>
                   <div class="custom-control custom-radio custom-control-inline">
-                    <input type="radio" th:field="*{prioridade}" id="prioridadeBaixa" value="Baixa" 
+                    <input type="radio" th:field="*{prioridade}" id="prioridadeBaixa" value="Baixa"
                       class="custom-control-input">
                     <label class="custom-control-label" for="prioridadeBaixa">Baixa</label>
                   </div>
@@ -213,7 +217,7 @@
               </div>
             </div>
           </div>
-          
+
           <!-- Seção de Opções Adicionais -->
           <div class="form-section">
             <h4 class="section-title">Opções Adicionais</h4>
@@ -224,50 +228,48 @@
                 </label>
                 <div>
                   <div class="custom-control custom-checkbox">
-                    <input type="checkbox" name="recursosAdicionais" value="Bluetooth" id="bluetooth" 
+                    <input type="checkbox" name="recursosAdicionais" value="Bluetooth" id="bluetooth"
                       class="custom-control-input">
                     <label class="custom-control-label" for="bluetooth">Bluetooth</label>
                   </div>
                   <div class="custom-control custom-checkbox">
-                    <input type="checkbox" name="recursosAdicionais" value="Wi-Fi" id="wifi" 
+                    <input type="checkbox" name="recursosAdicionais" value="Wi-Fi" id="wifi"
                       class="custom-control-input">
                     <label class="custom-control-label" for="wifi">Wi-Fi</label>
                   </div>
                   <div class="custom-control custom-checkbox">
-                    <input type="checkbox" name="recursosAdicionais" value="NFC" id="nfc" 
-                      class="custom-control-input">
+                    <input type="checkbox" name="recursosAdicionais" value="NFC" id="nfc" class="custom-control-input">
                     <label class="custom-control-label" for="nfc">NFC</label>
                   </div>
                   <div class="custom-control custom-checkbox">
-                    <input type="checkbox" name="recursosAdicionais" value="GPS" id="gps" 
-                      class="custom-control-input">
+                    <input type="checkbox" name="recursosAdicionais" value="GPS" id="gps" class="custom-control-input">
                     <label class="custom-control-label" for="gps">GPS</label>
                   </div>
                 </div>
               </div>
-              
+
               <div class="form-group col-md-6">
                 <label>
                   <i class="fas fa-map-marker-alt mr-1"></i> Locais Disponíveis
                 </label>
                 <div>
                   <div class="custom-control custom-checkbox">
-                    <input type="checkbox" name="locaisDisponiveis" value="Loja Central" id="lojaCentral" 
+                    <input type="checkbox" name="locaisDisponiveis" value="Loja Central" id="lojaCentral"
                       class="custom-control-input">
                     <label class="custom-control-label" for="lojaCentral">Loja Central</label>
                   </div>
                   <div class="custom-control custom-checkbox">
-                    <input type="checkbox" name="locaisDisponiveis" value="Loja Norte" id="lojaNorte" 
+                    <input type="checkbox" name="locaisDisponiveis" value="Loja Norte" id="lojaNorte"
                       class="custom-control-input">
                     <label class="custom-control-label" for="lojaNorte">Loja Norte</label>
                   </div>
                   <div class="custom-control custom-checkbox">
-                    <input type="checkbox" name="locaisDisponiveis" value="Loja Sul" id="lojaSul" 
+                    <input type="checkbox" name="locaisDisponiveis" value="Loja Sul" id="lojaSul"
                       class="custom-control-input">
                     <label class="custom-control-label" for="lojaSul">Loja Sul</label>
                   </div>
                   <div class="custom-control custom-checkbox">
-                    <input type="checkbox" name="locaisDisponiveis" value="Depósito" id="deposito" 
+                    <input type="checkbox" name="locaisDisponiveis" value="Depósito" id="deposito"
                       class="custom-control-input">
                     <label class="custom-control-label" for="deposito">Depósito</label>
                   </div>
@@ -275,7 +277,7 @@
               </div>
             </div>
           </div>
-          
+
           <!-- Seção de Especificação Técnica -->
           <div class="form-section">
             <h4 class="section-title">Especificação Técnica</h4>
@@ -283,11 +285,11 @@
               <label for="especificacaoTecnica">
                 <i class="fas fa-file-alt mr-1"></i> Detalhes Técnicos
               </label>
-              <textarea id="especificacaoTecnica" th:field="*{especificacaoTecnica}" class="form-control" 
-                rows="4" placeholder="Detalhes técnicos do produto"></textarea>
+              <textarea id="especificacaoTecnica" th:field="*{especificacaoTecnica}" class="form-control" rows="4"
+                placeholder="Detalhes técnicos do produto"></textarea>
             </div>
           </div>
-          
+
           <!-- Botões de Ação -->
           <div class="form-group text-center">
             <button type="submit" class="btn btn-success px-4 mx-2">
@@ -303,14 +305,14 @@
   </div>
 
   <!-- Scripts JavaScript do Bootstrap -->
-  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" 
-    integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" 
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+    integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
     crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" 
-    integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+    integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
     crossorigin="anonymous"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" 
-    integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" 
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+    integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
     crossorigin="anonymous"></script>
 </body>
 

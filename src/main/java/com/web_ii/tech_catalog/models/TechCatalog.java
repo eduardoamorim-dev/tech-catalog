@@ -6,6 +6,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "eletronicos")
@@ -16,16 +18,19 @@ public class TechCatalog {
 
     @Column(name = "codigo", nullable = false)
     private String codigo;
-
+    
+    @NotBlank(message = "Título não pode ser vazio")
     @Column(name = "titulo", nullable = false)
     private String titulo;
-
+    
+    @NotNull(message = "Valor base não pode ser nulo")
     @Column(name = "valor_base")
     private Double valorBase;
 
     @Column(name = "especificacao_tecnica", columnDefinition = "TEXT")
     private String especificacaoTecnica;
 
+    @NotNull(message = "Categoria não pode ser nula")
     @Column(name = "categoria")
     private String categoria;
 

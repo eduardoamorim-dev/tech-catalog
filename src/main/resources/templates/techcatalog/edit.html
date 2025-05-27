@@ -25,7 +25,6 @@
 </style>
 </head>
 <body class="bg-light">
-<!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
     <div class="container">
         <a class="navbar-brand" href="/techcatalog">Tech Catalog</a>
@@ -58,10 +57,8 @@
         </div>
         <div class="card-body">
             <form action="#" th:action="@{/techcatalog/save}" th:object="${techcatalog}" method="POST">
-                <!-- Campo necessário para que o save saiba que não estamos criando, mas editando um produto -->
                 <input type="hidden" th:field="*{id}" />
 
-                <!-- Seção de Informações Básicas -->
                 <div class="form-section">
                     <h4 class="section-title">Informações Básicas</h4>
                     <div class="form-row">
@@ -129,7 +126,6 @@
                     </div>
                 </div>
                 
-                <!-- Seção de Status e Prioridade -->
                 <div class="form-section">
                     <h4 class="section-title">Status e Prioridade</h4>
                     <div class="form-row">
@@ -194,7 +190,6 @@
                     </div>
                 </div>
                 
-                <!-- Seção de Opções Adicionais -->
                 <div class="form-section">
                     <h4 class="section-title">Opções Adicionais</h4>
                     <div class="form-row">
@@ -256,7 +251,6 @@
                     </div>
                 </div>
                 
-                <!-- Seção de Especificação Técnica -->
                 <div class="form-section">
                     <h4 class="section-title">Especificação Técnica</h4>
                     <div class="form-group">
@@ -268,7 +262,6 @@
                     </div>
                 </div>
                 
-                <!-- Botões de Ação -->
                 <div class="form-group text-center">
                     <button type="submit" class="btn btn-success px-4 mx-2">
                         <i class="fas fa-save mr-1"></i> Salvar Alterações
@@ -282,7 +275,6 @@
     </div>
 </div>
 
-<!-- Scripts JavaScript do Bootstrap -->
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" 
     integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" 
     crossorigin="anonymous"></script>
