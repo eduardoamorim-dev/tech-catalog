@@ -1,0 +1,103 @@
+/* ========== TECH CATALOG - ESTILOS PERSONALIZADOS ========== */
+
+/* Seções de Formulário */
+.form-section {
+  background-color: #f8f9fa;
+  border-radius: 5px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Títulos das Seções */
+.section-title {
+  border-bottom: 2px solid #007bff;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+  color: #343a40;
+}
+
+/* Botão Flutuante de Voltar */
+.back-button {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 1000;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsividade para dispositivos móveis */
+@media (max-width: 768px) {
+  .form-section {
+      padding: 15px;
+      margin-bottom: 15px;
+  }
+  
+  .back-button {
+      width: 50px;
+      height: 50px;
+      bottom: 20px;
+      right: 20px;
+  }
+  
+  .back-button i {
+      font-size: 1.2em !important;
+  }
+}
+
+/* Melhorias visuais adicionais */
+.card {
+  border: none;
+  border-radius: 8px;
+}
+
+.card-header {
+  border-radius: 8px 8px 0 0 !important;
+}
+
+.navbar-brand {
+  font-weight: 600;
+  font-size: 1.4rem;
+}
+
+/* Badges personalizados */
+.badge {
+  font-size: 0.75em;
+  padding: 0.375em 0.75em;
+}
+
+/* Botões de ação */
+.btn-group .btn {
+  margin: 0 1px;
+}
+
+/* Tabelas responsivas */
+.table-responsive {
+  border-radius: 5px;
+}
+
+/* Modais */
+.modal-content {
+  border-radius: 8px;
+}
+
+.modal-header {
+  border-radius: 8px 8px 0 0;
+}
+
+/* Formulários */
+.form-control:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.custom-control-input:checked ~ .custom-control-label::before {
+  background-color: #007bff;
+  border-color: #007bff;
+}

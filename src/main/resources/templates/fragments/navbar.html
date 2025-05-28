@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+
+<!-- Fragment para Navbar -->
+<nav th:fragment="navbar(activeItem)" class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+    <div class="container">
+        <a class="navbar-brand" href="/techcatalog">
+            <i class="fas fa-microchip mr-2"></i>Tech Catalog
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" 
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item" th:classappend="${activeItem == 'listagem'} ? 'active' : ''">
+                    <a class="nav-link" th:href="@{/techcatalog}">
+                        <i class="fas fa-list mr-1"></i> Listagem
+                        <span th:if="${activeItem == 'listagem'}" class="sr-only">(current)</span>
+                    </a>
+                </li>
+                <li class="nav-item" th:classappend="${activeItem == 'cadastro'} ? 'active' : ''">
+                    <a class="nav-link" th:href="@{/techcatalog/create}">
+                        <i class="fas fa-plus mr-1"></i> Novo Cadastro
+                        <span th:if="${activeItem == 'cadastro'}" class="sr-only">(current)</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+</html>
