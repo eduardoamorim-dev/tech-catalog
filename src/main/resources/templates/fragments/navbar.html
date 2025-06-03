@@ -15,14 +15,14 @@
         
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
-                <li sec:authorize="hasAuthority('Admin')" class="nav-item" th:classappend="${activeItem == 'listagem'} ? 'active' : ''">
+                <li class="nav-item" th:classappend="${activeItem == 'listagem'} ? 'active' : ''">
                     <a class="nav-link" th:href="@{/techcatalog}">
                         <i class="fas fa-list mr-1"></i> Listagem
                         <span th:if="${activeItem == 'listagem'}" class="sr-only">(current)</span>
                     </a>
                 </li>
                 <li class="nav-item" th:classappend="${activeItem == 'cadastro'} ? 'active' : ''">
-                    <a class="nav-link" th:href="@{/techcatalog/create}">
+                    <a sec:authorize="hasAuthority('Admin')" class="nav-link" th:href="@{/techcatalog/create}">
                         <i class="fas fa-plus mr-1"></i> Novo Cadastro
                         <span th:if="${activeItem == 'cadastro'}" class="sr-only">(current)</span>
                     </a>
