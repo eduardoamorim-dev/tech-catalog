@@ -1,13 +1,14 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-  <head>
-    <meta charset="ISO-8859-1" />
-    <title>Insert title here</title>
-  </head>
-  <body>
-    <h3>You are not allowed to access this page. Please go to Welcome Page</h3>
-    Add commentMore actions
-    <a th:href="@{/welcome}">Welcome</a>
-    <a th:href="@{/logout}">LOGOUT</a>
-  </body>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">Add commentMore actions
+    <head th:replace="fragments/head :: head('Acesso negado')"></head>
+<body>
+	<nav th:replace="fragments/navbar :: navbar('403')"></nav>
+	<div class="text-center">
+		<h1 class="display-1 text-danger">403</h1>
+		<p class="lead">Acesso Negado</p>
+		<p class="mb-4">Você não tem permissão para acessar este recurso.</p>
+		<div class="d-flex justify-content-center">
+			<a href="/" class="btn btn-primary mr-2">Ir para a Página Inicial</a>
+		</div>
+	</div>
+</body>
 </html>
