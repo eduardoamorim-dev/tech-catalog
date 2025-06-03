@@ -88,6 +88,10 @@
     		<artifactId>lombok</artifactId>
     		<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.thymeleaf.extras</groupId>
+			<artifactId>thymeleaf-extras-springsecurity6</artifactId>Add commentMore actions
+		</dependency>
 		</dependencies>
 
 	<build>
