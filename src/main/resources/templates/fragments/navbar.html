@@ -13,9 +13,9 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         
-        <div sec:authorize="hasAuthority('Admin')" class="collapse navbar-collapse" id="navbarNav">
+        <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
-                <li class="nav-item" th:classappend="${activeItem == 'listagem'} ? 'active' : ''">
+                <li sec:authorize="hasAuthority('Admin')" class="nav-item" th:classappend="${activeItem == 'listagem'} ? 'active' : ''">
                     <a class="nav-link" th:href="@{/techcatalog}">
                         <i class="fas fa-list mr-1"></i> Listagem
                         <span th:if="${activeItem == 'listagem'}" class="sr-only">(current)</span>
@@ -28,6 +28,15 @@
                     </a>
                 </li>
             </ul>
+            <form class="form-inline my-2 my-lg-0" action="/logout" method="post">
+              Add commentMore actions
+              <input
+                type="hidden"
+                th:name="${_csrf.parameterName}"
+                th:value="${_csrf.token}"
+              />
+              <button type="submit" class="btn my-2 my-sm-0">Sair</button>
+            </form>
         </div>
     </div>
 </nav>
