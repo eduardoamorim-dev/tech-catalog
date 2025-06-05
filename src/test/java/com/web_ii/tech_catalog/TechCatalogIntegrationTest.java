@@ -51,7 +51,7 @@ public class TechCatalogIntegrationTest {
 
         mockMvc.perform(post("/techcatalog/save")
                 .with(csrf())
-                .flashAttr("techcatalog", techCatalogA))
+                .flashAttr("techCatalog", techCatalogA))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/techcatalog"));
 

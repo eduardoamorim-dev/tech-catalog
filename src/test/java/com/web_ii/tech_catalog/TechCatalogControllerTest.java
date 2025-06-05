@@ -77,11 +77,11 @@ public class TechCatalogControllerTest {
         when(techCatalogService.getAllTechCatalog()).thenReturn(testCreateTechCatalogList());
 
         mockMvc.perform(get("/techcatalog"))
-               .andExpect(status().isOk())
-               .andExpect(view().name("techcatalog/index"))
-               .andExpect(model().attributeExists("techCatalogList"))
-               .andExpect(content().string(containsString("Listagem de Eletrônicos")))
-               .andExpect(content().string(containsString("Produto B")));
+            .andExpect(status().isOk())
+            .andExpect(view().name("techcatalog/index"))
+            .andExpect(model().attributeExists("eletronicosList"))
+            .andExpect(content().string(containsString("Listagem de Eletrônicos")))
+            .andExpect(content().string(containsString("Produto B")));
     }
 
     @Test
@@ -101,7 +101,7 @@ public class TechCatalogControllerTest {
     void testCreateFormNotAuthorizedUser() throws Exception {
         when(techCatalogService.getAllTechCatalog()).thenReturn(testCreateTechCatalogList());
        // Obter o HTML da página renderizada pelo controlador
-       mockMvc.perform(get("/techcatalog/create"))
+    mockMvc.perform(get("/techcatalog/create"))
             .andExpect(status().isOk())
             .andExpect(view().name("techcatalog/create"))
             .andExpect(model().attributeExists("techcatalog"))
@@ -119,7 +119,7 @@ public class TechCatalogControllerTest {
                         .flashAttr("techcatalog", techCatalog))
                 .andExpect(status().isOk())
                 .andExpect(view().name("techcatalog/create"))
-                .andExpect(model().attributeHasErrors("techcatalog"));
+                .andExpect(model().attributeHasErrors("techCatalog"));
 
         verify(techCatalogService, never()).saveTechCatalog(any(TechCatalog.class));
     }
@@ -143,7 +143,7 @@ public class TechCatalogControllerTest {
 
         mockMvc.perform(post("/techcatalog/save")
                         .with(csrf())
-                        .flashAttr("techcatalog", techCatalog))
+                        .flashAttr("techCatalog", techCatalog))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(view().name("redirect:/techcatalog"));
 

@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import com.web_ii.tech_catalog.models.TechCatalog;
 import com.web_ii.tech_catalog.repository.TechCatalogRepository;
 import com.web_ii.tech_catalog.service.TechCatalogService;
-import com.web_ii.tech_catalog.service.TechCatalogService;
 
     @Service
     public class TechCatalogServiceImpl implements TechCatalogService {
