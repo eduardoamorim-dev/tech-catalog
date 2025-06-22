@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 import com.web_ii.tech_catalog.models.User;
 import com.web_ii.tech_catalog.service.IUserService;
+import java.util.Arrays;
 
 @Controller
 public class UserController {
@@ -22,15 +23,29 @@ public class UserController {
         return "user/registerUser";
     }
 
+    @GetMapping("/admin/register")
+    public String adminRegister() {
+        return "user/registerAdmin";
+    }
+
     // Read Form data to save into DB
     @PostMapping("/saveUser")
-    public String saveUser(
-            @ModelAttribute User user,
-            Model model) {
+    public String saveUser(@ModelAttribute User user, Model model) {
+        // Define automaticamente o role como USER
+        user.setRoles(Arrays.asList("user"));
+        
         Integer id = userService.saveUser(user);
-        String message = "User '" + id + "' saved successfully !";
+        String message = "Usuário '" + user.getName() + "' registrado com sucesso!";
         model.addAttribute("msg", message);
         return "user/registerUser";
+    }
+
+    @PostMapping("/admin/saveUser")
+    public String saveAdminUser(@ModelAttribute User user, Model model) {
+        Integer id = userService.saveUser(user);
+        String message = "Usuário '" + user.getName() + "' registrado com sucesso!";
+        model.addAttribute("msg", message);
+        return "user/registerAdmin";
     }
 
     @GetMapping("/accessDenied")

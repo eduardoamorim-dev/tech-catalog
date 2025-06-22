@@ -1,28 +1,115 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="ISO-8859-1">
-<title>User Registration</title>
+    <meta charset="UTF-8">
+    <title>Registro de Usuário</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            max-width: 400px;
+            width: 100%;
+        }
+        h3 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        input[type="text"], input[type="email"], input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .message {
+            color: green;
+            text-align: center;
+            margin-top: 15px;
+        }
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .back-link a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .info {
+            background-color: #e7f3ff;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            color: #0066cc;
+        }
+    </style>
 </head>
 <body>
-<h3>User Registration</h3>
-<form action="saveUser" method="post">
-<pre>
-Name :    <input type="text" name="name"/>
-
-Email:    <input type="text" name="email"/>
-
-Password: <input type="password" name="password"/>
-
-Role(s): <input type="checkbox" name="roles" value="Admin"/>Admin
-        <input type="checkbox" name="roles" value="Manager"/>Manager
-    <input type="checkbox" name="roles" value="HR"/>HR
-    <input type="checkbox" name="roles" value="Employee"/>Employee
-<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-    <input type="submit" value="Register"/>
-
-</pre>
-</form>
-<div th:text="${msg}"></div>
+    <div class="container">
+        <h3>Registro de Usuário</h3>
+        
+        <div class="info">
+            <strong>Nota:</strong> Você será registrado como usuário comum do sistema.
+        </div>
+        
+        <form action="/saveUser" method="post">
+            <div class="form-group">
+                <label for="name">Nome:</label>
+                <input type="text" id="name" name="name" required/>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required/>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Senha:</label>
+                <input type="password" id="password" name="password" required/>
+            </div>
+            
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <input type="submit" value="Registrar" class="btn"/>
+        </form>
+        
+        <div th:if="${msg}" th:text="${msg}" class="message"></div>
+        
+        <div class="back-link">
+            <a href="/">← Voltar para a página inicial</a>
+        </div>
+    </div>
 </body>
 </html>

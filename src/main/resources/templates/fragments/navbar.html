@@ -1,54 +1,94 @@
 <!DOCTYPE html>
 <html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
-
-<!-- Fragment para Navbar -->
-<nav th:fragment="navbar(activeItem)" class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+  <!-- Fragment para Navbar -->
+  <nav
+    th:fragment="navbar(activeItem)"
+    class="navbar navbar-expand-lg navbar-dark bg-primary mb-4"
+  >
     <div class="container">
-        <a class="navbar-brand" href="/techcatalog">
-            <i class="fas fa-microchip mr-2"></i>Tech Catalog
-        </a>
-        
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" 
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item" th:classappend="${activeItem == 'listagem'} ? 'active' : ''">
-                    <a class="nav-link" th:href="@{/techcatalog}">
-                        <i class="fas fa-list mr-1"></i> Listagem
-                        <span th:if="${activeItem == 'listagem'}" class="sr-only">(current)</span>
-                    </a>
-                </li>
-                <!-- <li class="nav-item" th:classappend="${activeItem == 'listagem'} ? 'active' : ''">
+      <a class="navbar-brand" href="/techcatalog">
+        <i class="fas fa-microchip mr-2"></i>Tech Catalog
+      </a>
+
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-toggle="collapse"
+        data-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+          <li
+            class="nav-item"
+            th:classappend="${activeItem == 'listagem'} ? 'active' : ''"
+          >
+            <a class="nav-link" th:href="@{/techcatalog}">
+              <i class="fas fa-list mr-1"></i> Listagem
+              <span th:if="${activeItem == 'listagem'}" class="sr-only"
+                >(current)</span
+              >
+            </a>
+          </li>
+          <!-- <li class="nav-item" th:classappend="${activeItem == 'listagem'} ? 'active' : ''">
                     <a class="nav-link" th:href="@{/techcatalog}">
                         <i class="fas fa-list mr-1"></i> Listagem de Produtos
                         <span th:if="${activeItem == 'listagem'}" class="sr-only">(current)</span>
                     </a>
                 </li> -->
-                <li class="nav-item" th:classappend="${activeItem == 'cadastro'} ? 'active' : ''">
-                    <a sec:authorize="hasAuthority('Admin')" class="nav-link" th:href="@{/techcatalog/create}">
-                        <i class="fas fa-plus mr-1"></i> Novo Cadastro
-                        <span th:if="${activeItem == 'cadastro'}" class="sr-only">(current)</span>
-                    </a>
-                </li>
-            </ul>
-            <form class="form-inline my-2 my-lg-0" action="/logout" method="post">
-                <input
-                type="hidden"
-                th:name="${_csrf.parameterName}"
-                th:value="${_csrf.token}"
-                />
-                <button
-                    type="submit"
-                    class="btn btn-logout-subtle d-lg-inline-block my-2 my-sm-0"
-                >
-                    Sair
-                </button>
-            </form>
-        </div>
-    </div>
-</nav>
+          <!-- Cadastro de Produtos -->
+          <li
+            class="nav-item"
+            th:classappend="${activeItem == 'cadastroProduto'} ? 'active' : ''"
+          >
+            <a
+              sec:authorize="hasAuthority('Admin')"
+              class="nav-link"
+              th:href="@{/techcatalog/create}"
+            >
+              <i class="fas fa-plus mr-1"></i> Novo Cadastro
+              <span th:if="${activeItem == 'cadastroProduto'}" class="sr-only"
+                >(current)</span
+              >
+            </a>
+          </li>
 
+          <!-- Registro de Novo Usuário -->
+          <li
+            class="nav-item"
+            th:classappend="${activeItem == 'cadastroUsuario'} ? 'active' : ''"
+          >
+            <a
+              sec:authorize="hasAuthority('Admin')"
+              class="nav-link"
+              th:href="@{/admin/register}"
+            >
+              <i class="fas fa-user-plus mr-1"></i> Registrar Novo Usuário
+              <span th:if="${activeItem == 'cadastroUsuario'}" class="sr-only"
+                >(current)</span
+              >
+            </a>
+          </li>
+        </ul>
+        <form class="form-inline my-2 my-lg-0" action="/logout" method="post">
+          <input
+            type="hidden"
+            th:name="${_csrf.parameterName}"
+            th:value="${_csrf.token}"
+          />
+          <button
+            type="submit"
+            class="btn btn-logout-subtle d-lg-inline-block my-2 my-sm-0"
+          >
+            Sair
+          </button>
+        </form>
+      </div>
+    </div>
+  </nav>
 </html>

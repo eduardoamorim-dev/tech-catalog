@@ -20,27 +20,29 @@ public class SecurityConfig {
 	
 	@Autowired
 	private UserDetailsService uds;
-	
+
 	@Autowired
 	private BCryptPasswordEncoder encoder;
-	
+
+	@Autowired
+	private CustomSuccessHandler customSuccessHandler;
+
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        http.authorizeHttpRequests(requests -> requests
-                .requestMatchers("/home", "/register", "/saveUser").permitAll()
-                .requestMatchers("/product/*").hasAuthority("Admin")
-                .anyRequest().authenticated())
-                .formLogin(login -> login
-                        .defaultSuccessUrl("/", true))
-                .logout(logout -> logout
-                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout")))
-                .exceptionHandling(handling -> handling
-                        .accessDeniedPage("/accessDenied"))
-                .authenticationProvider(authenticationProvider());
-		
+		http.authorizeHttpRequests(requests -> requests
+				.requestMatchers("/", "/home", "/register", "/saveUser").permitAll()
+				.requestMatchers("/techcatalog/*").hasAuthority("Admin")
+				.anyRequest().authenticated())
+			.formLogin(login -> login
+				.successHandler(customSuccessHandler)) // redirecionamento customizado
+			.logout(logout -> logout
+				.logoutRequestMatcher(new AntPathRequestMatcher("/logout")))
+			.exceptionHandling(handling -> handling
+				.accessDeniedPage("/accessDenied"))
+			.authenticationProvider(authenticationProvider());
+
 		return http.build();
-		
 	}
 	
 	@Bean
