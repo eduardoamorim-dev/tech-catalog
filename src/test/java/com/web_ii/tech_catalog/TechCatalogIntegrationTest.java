@@ -36,19 +36,16 @@ public class TechCatalogIntegrationTest {
     void testSaveTechCatalogIntegration() throws Exception {
 
         TechCatalog techCatalogA = new TechCatalog();
-        techCatalogA.setCodigo("1234");
         techCatalogA.setTitulo("Produto A");
         techCatalogA.setValorBase(65.24);
+        techCatalogA.setDescricaoProduto("Descrição do Produto A");
         techCatalogA.setEspecificacaoTecnica("Especificação técnica do Produto A");
         techCatalogA.setCategoria("Categoria A");
-        techCatalogA.setFabricante("Fabricante A");
-        techCatalogA.setNivelEstoque("Alto");
-        techCatalogA.setEstado("Novo");
-        techCatalogA.setPrioridade("Alta");
+        techCatalogA.setNivelEstoque(17);
         techCatalogA.setRecursosAdicionais("Recurso adicional A");
         techCatalogA.setLocaisDisponiveis(null); // Pode ser null se não houver locais disponíveis
-
-
+        techCatalogA.setImagemUrl("https://images.pexels.com/photos/205926/pexels-photo-205926.jpeg");
+       
         mockMvc.perform(post("/techcatalog/save")
                 .with(csrf())
                 .flashAttr("techCatalog", techCatalogA))

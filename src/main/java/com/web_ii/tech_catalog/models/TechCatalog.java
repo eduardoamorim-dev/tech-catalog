@@ -16,9 +16,6 @@ public class TechCatalog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "codigo", nullable = false)
-    private String codigo;
-    
     @NotBlank(message = "Título não pode ser vazio")
     @Column(name = "titulo", nullable = false)
     private String titulo;
@@ -27,6 +24,10 @@ public class TechCatalog {
     @Column(name = "valor_base")
     private Double valorBase;
 
+    @NotNull(message = "Descricao não pode ser nula")
+    @Column(name = "descricao_produto", columnDefinition = "TEXT")
+    private String descricao_produto;
+
     @Column(name = "especificacao_tecnica", columnDefinition = "TEXT")
     private String especificacaoTecnica;
 
@@ -34,23 +35,19 @@ public class TechCatalog {
     @Column(name = "categoria")
     private String categoria;
 
-    @Column(name = "fabricante")
-    private String fabricante;
-
+    @NotNull(message = "Nivel de estoque não pode ser nulo")
     @Column(name = "nivel_estoque")
-    private String nivelEstoque;
-
-    @Column(name = "estado")
-    private String estado;
-
-    @Column(name = "prioridade")
-    private String prioridade;
+    private Integer nivelEstoque;
 
     @Column(name = "recursos_adicionais")
     private String recursosAdicionais;
 
     @Column(name = "locais_disponiveis")
     private String locaisDisponiveis;
+
+    @NotNull(message = "Imagem não pode ser nula")
+    @Column(name = "imagem_url")
+    private String imagemUrl;
 
     // Getters e Setters
     public Long getId() {
@@ -61,13 +58,6 @@ public class TechCatalog {
         this.id = id;
     }
 
-    public String getCodigo() {
-        return codigo;
-    }
-
-    public void setCodigo(String codigo) {
-        this.codigo = codigo;
-    }
 
     public String getTitulo() {
         return titulo;
@@ -83,6 +73,14 @@ public class TechCatalog {
 
     public void setValorBase(Double valorBase) {
         this.valorBase = valorBase;
+    }
+
+    public String getDescricaoProduto() {
+        return descricao_produto;
+    }
+
+    public void setDescricaoProduto(String descricao_produto) {
+        this.descricao_produto = descricao_produto;
     }
 
     public String getEspecificacaoTecnica() {
@@ -101,36 +99,12 @@ public class TechCatalog {
         this.categoria = categoria;
     }
 
-    public String getFabricante() {
-        return fabricante;
-    }
-
-    public void setFabricante(String fabricante) {
-        this.fabricante = fabricante;
-    }
-
-    public String getNivelEstoque() {
+    public Integer getNivelEstoque() {
         return nivelEstoque;
     }
 
-    public void setNivelEstoque(String nivelEstoque) {
+    public void setNivelEstoque(Integer nivelEstoque) {
         this.nivelEstoque = nivelEstoque;
-    }
-
-    public String getEstado() {
-        return estado;
-    }
-
-    public void setEstado(String estado) {
-        this.estado = estado;
-    }
-
-    public String getPrioridade() {
-        return prioridade;
-    }
-
-    public void setPrioridade(String prioridade) {
-        this.prioridade = prioridade;
     }
 
     public String getRecursosAdicionais() {
@@ -147,5 +121,13 @@ public class TechCatalog {
 
     public void setLocaisDisponiveis(String locaisDisponiveis) {
         this.locaisDisponiveis = locaisDisponiveis;
+    }
+
+    public String getImagemUrl() {
+        return imagemUrl;
+    }
+
+    public void setImagemUrl(String imagemUrl) {
+        this.imagemUrl = imagemUrl;
     }
 }

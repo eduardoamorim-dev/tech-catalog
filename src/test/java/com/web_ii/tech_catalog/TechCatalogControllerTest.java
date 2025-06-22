@@ -49,17 +49,15 @@ public class TechCatalogControllerTest {
     private List<TechCatalog> testCreateTechCatalogList(){
         TechCatalog techCatalogB = new TechCatalog();
         techCatalogB.setId(1L);
-        techCatalogB.setCodigo("1234");
         techCatalogB.setTitulo("Produto B");
         techCatalogB.setValorBase(65.24);
+        techCatalogB.setDescricaoProduto("Descrção do Produto B");
         techCatalogB.setEspecificacaoTecnica("Especificação técnica do Produto B");
         techCatalogB.setCategoria("Categoria B");
-        techCatalogB.setFabricante("Fabricante B");
-        techCatalogB.setNivelEstoque("Alto");
-        techCatalogB.setEstado("Novo");
-        techCatalogB.setPrioridade("Alta");
+        techCatalogB.setNivelEstoque(10);
         techCatalogB.setRecursosAdicionais("Recurso adicional B");
         techCatalogB.setLocaisDisponiveis(null); // Pode ser null se não houver locais disponíveis
+        techCatalogB.setImagemUrl("https://images.pexels.com/photos/205926/pexels-photo-205926.jpeg");
         return List.of(techCatalogB);
     }
 
@@ -129,17 +127,16 @@ public class TechCatalogControllerTest {
     @DisplayName("POST /techcatalog/save - Eletronico válido é salvo com sucesso")
     void testSaveValidTechCatalog() throws Exception {
         TechCatalog techCatalog = new TechCatalog();
-        techCatalog.setCodigo("1234");
+
         techCatalog.setTitulo("Eletronico");
         techCatalog.setValorBase(100.24);
+        techCatalog.setDescricaoProduto("Descrição do Eletronico");
         techCatalog.setEspecificacaoTecnica("Especificação técnica do Eletronico");
         techCatalog.setCategoria("Categoria");
-        techCatalog.setFabricante("Fabricante");
-        techCatalog.setNivelEstoque("Alto");
-        techCatalog.setEstado("Novo");
-        techCatalog.setPrioridade("Alta");
+        techCatalog.setNivelEstoque(10);
         techCatalog.setRecursosAdicionais("Recurso adicional");
         techCatalog.setLocaisDisponiveis(null); // Pode ser null se não houver locais disponíveis
+        techCatalog.setImagemUrl("https://images.pexels.com/photos/205926/pexels-photo-205926.jpeg");
 
         mockMvc.perform(post("/techcatalog/save")
                         .with(csrf())

@@ -32,15 +32,7 @@
           <div class="form-section">
             <h4 class="section-title">Informações Básicas</h4>
             <div class="form-row">
-              <div class="form-group col-md-4">
-                <label for="codigo">
-                  <i class="fas fa-barcode mr-1"></i> Código
-                </label>
-                <input type="text" th:field="*{codigo}" class="form-control" id="codigo"
-                  placeholder="Digite o código do produto">
-              </div>
-
-              <div class="form-group col-md-8">
+              <div class="form-group col-md-12">
                 <label for="titulo">
                   <i class="fas fa-tag mr-1"></i> Título
                 </label>
@@ -51,7 +43,7 @@
             </div>
 
             <div class="form-row">
-              <div class="form-group col-md-4">
+              <div class="form-group col-md-6">
                 <label for="valorBase">
                   <i class="fas fa-dollar-sign mr-1"></i> Valor Base
                 </label>
@@ -65,7 +57,7 @@
                 <span th:if="${#fields.hasErrors('valorBase')}" th:errors="*{valorBase}" class="text-danger"></span>
               </div>
 
-              <div class="form-group col-md-4">
+              <div class="form-group col-md-6">
                 <label for="categoria">
                   <i class="fas fa-clipboard-list mr-1"></i> Categoria
                 </label>
@@ -80,85 +72,34 @@
                 </select>
                 <span th:if="${#fields.hasErrors('categoria')}" th:errors="*{categoria}" class="text-danger"></span>
               </div>
+            </div>
 
-              <div class="form-group col-md-4">
-                <label for="fabricante">
-                  <i class="fas fa-industry mr-1"></i> Fabricante
+            <!-- Nova seção para URL da Imagem -->
+            <div class="form-row">
+              <div class="form-group col-md-12">
+                <label for="imagemUrl">
+                  <i class="fas fa-image mr-1"></i> URL da Imagem
                 </label>
-                <select id="fabricante" th:field="*{fabricante}" class="form-control">
-                  <option value="">Selecione um fabricante</option>
-                  <option value="Samsung">Samsung</option>
-                  <option value="Apple">Apple</option>
-                  <option value="LG">LG</option>
-                  <option value="Sony">Sony</option>
-                  <option value="Xiaomi">Xiaomi</option>
-                  <option value="Dell">Dell</option>
-                  <option value="HP">HP</option>
-                </select>
+                <input type="url" th:field="*{imagemUrl}" class="form-control" id="imagemUrl"
+                  placeholder="https://exemplo.com/imagem.jpg">
+                <small class="form-text text-muted">
+                  <i class="fas fa-info-circle mr-1"></i>
+                  Insira a URL completa da imagem do produto (ex: https://exemplo.com/produto.jpg)
+                </small>
               </div>
             </div>
           </div>
 
-          <!-- Seção de Status e Prioridade -->
+          <!-- Seção de Estoque -->
           <div class="form-section">
-            <h4 class="section-title">Status e Prioridade</h4>
+            <h4 class="section-title">Estoque</h4>
             <div class="form-row">
-              <div class="form-group col-md-4">
+              <div class="form-group col-md-12">
                 <label for="nivelEstoque">
-                  <i class="fas fa-box mr-1"></i> Nível de Estoque
+                  <i class="fas fa-box mr-1"></i> Quantidade em Estoque
                 </label>
-                <select id="nivelEstoque" th:field="*{nivelEstoque}" class="form-control">
-                  <option value="">Selecione o nível de estoque</option>
-                  <option value="Alto">Alto</option>
-                  <option value="Médio">Médio</option>
-                  <option value="Baixo">Baixo</option>
-                  <option value="Esgotado">Esgotado</option>
-                </select>
-              </div>
-
-              <div class="form-group col-md-4">
-                <label>
-                  <i class="fas fa-check-circle mr-1"></i> Estado
-                </label>
-                <div>
-                  <div class="custom-control custom-radio custom-control-inline">
-                    <input type="radio" th:field="*{estado}" id="estadoNovo" value="Novo" class="custom-control-input">
-                    <label class="custom-control-label" for="estadoNovo">Novo</label>
-                  </div>
-                  <div class="custom-control custom-radio custom-control-inline">
-                    <input type="radio" th:field="*{estado}" id="estadoUsado" value="Usado"
-                      class="custom-control-input">
-                    <label class="custom-control-label" for="estadoUsado">Usado</label>
-                  </div>
-                  <div class="custom-control custom-radio custom-control-inline">
-                    <input type="radio" th:field="*{estado}" id="estadoRecondicionado" value="Recondicionado"
-                      class="custom-control-input">
-                    <label class="custom-control-label" for="estadoRecondicionado">Recondicionado</label>
-                  </div>
-                </div>
-              </div>
-
-              <div class="form-group col-md-4">
-                <label>
-                  <i class="fas fa-flag mr-1"></i> Prioridade
-                </label>
-                <div>
-                  <div class="custom-control custom-radio custom-control-inline">
-                    <input type="radio" th:field="*{prioridade}" id="prioridadeAlta" value="Alta"
-                      class="custom-control-input">
-                    <label class="custom-control-label" for="prioridadeAlta">Alta</label>
-                  </div>
-                  <div class="custom-control custom-radio custom-control-inline">
-                    <input type="radio" th:field="*{prioridade}" id="prioridadeMedia" value="Média"
-                      class="custom-control-input">
-                    <label class="custom-control-label" for="prioridadeMedia">Média</label>
-                  </div>
-                  <div class="custom-control custom-radio custom-control-inline">
-                    <input type="radio" th:field="*{prioridade}" id="prioridadeBaixa" value="Baixa"
-                      class="custom-control-input">
-                    <label class="custom-control-label" for="prioridadeBaixa">Baixa</label>
-                  </div>
-                </div>
+                <input type="number" th:field="*{nivelEstoque}" class="form-control" id="nivelEstoque" 
+                       min="0" placeholder="Digite a quantidade disponível em estoque">
               </div>
             </div>
           </div>
@@ -199,11 +140,6 @@
                 </label>
                 <div>
                   <div class="custom-control custom-checkbox">
-                    <input type="checkbox" name="locaisDisponiveis" value="Loja Central" id="lojaCentral"
-                      class="custom-control-input">
-                    <label class="custom-control-label" for="lojaCentral">Loja Central</label>
-                  </div>
-                  <div class="custom-control custom-checkbox">
                     <input type="checkbox" name="locaisDisponiveis" value="Loja Norte" id="lojaNorte"
                       class="custom-control-input">
                     <label class="custom-control-label" for="lojaNorte">Loja Norte</label>
@@ -223,12 +159,24 @@
             </div>
           </div>
 
+          <!-- Seção de Descrição do Produto -->
+          <div class="form-section">
+            <h4 class="section-title">Descrição do Produto</h4>
+            <div class="form-group">
+              <label for="descricaoProduto">
+                <i class="fas fa-file-alt mr-1"></i> Descrição Detalhada
+              </label>
+              <textarea id="descricaoProduto" th:field="*{descricaoProduto}" class="form-control" rows="4"
+                placeholder="Descrição detalhada do produto"></textarea>
+            </div>
+          </div>
+
           <!-- Seção de Especificação Técnica -->
           <div class="form-section">
             <h4 class="section-title">Especificação Técnica</h4>
             <div class="form-group">
               <label for="especificacaoTecnica">
-                <i class="fas fa-file-alt mr-1"></i> Detalhes Técnicos
+                <i class="fas fa-cogs mr-1"></i> Detalhes Técnicos
               </label>
               <textarea id="especificacaoTecnica" th:field="*{especificacaoTecnica}" class="form-control" rows="4"
                 placeholder="Detalhes técnicos do produto"></textarea>

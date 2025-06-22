@@ -21,6 +21,12 @@
                         <span th:if="${activeItem == 'listagem'}" class="sr-only">(current)</span>
                     </a>
                 </li>
+                <!-- <li class="nav-item" th:classappend="${activeItem == 'listagem'} ? 'active' : ''">
+                    <a class="nav-link" th:href="@{/techcatalog}">
+                        <i class="fas fa-list mr-1"></i> Listagem de Produtos
+                        <span th:if="${activeItem == 'listagem'}" class="sr-only">(current)</span>
+                    </a>
+                </li> -->
                 <li class="nav-item" th:classappend="${activeItem == 'cadastro'} ? 'active' : ''">
                     <a sec:authorize="hasAuthority('Admin')" class="nav-link" th:href="@{/techcatalog/create}">
                         <i class="fas fa-plus mr-1"></i> Novo Cadastro
