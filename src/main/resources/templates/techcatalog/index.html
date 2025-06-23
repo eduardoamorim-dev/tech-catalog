@@ -1,230 +1,567 @@
 <!DOCTYPE html>
 <html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="fragments/head :: head('Loja de Eletrônicos')"></head>
 
-<head th:replace="fragments/head :: head('Listagem de Eletrônicos')"></head>
+  <body class="bg-light">
+    <!-- Navbar -->
+    <nav th:replace="fragments/navbar :: navbar('listagem')"></nav>
 
-<body class="bg-light">
-  <!-- Navbar -->
-  <nav th:replace="fragments/navbar :: navbar('listagem')"></nav>
+    <div class="container">
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="hero-section">
+            <h1 class="hero-title">
+              <i class="fas fa-shopping-bag mr-3"></i>Loja de Eletrônicos
+            </h1>
+            <p class="hero-subtitle">
+              Descubra os melhores produtos com preços incríveis
+            </p>
+          </div>
+        </div>
+      </div>
 
-  <div class="container">
-    <div class="card shadow-sm mb-4">
-      <div class="card-body">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h2 class="card-title mb-0">
-            <i class="fas fa-list mr-2"></i>Listagem de Eletrônicos
-          </h2>
+      <!-- Filtros e Busca -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col-md-8">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">
+                    <i class="fas fa-search"></i>
+                  </span>
+                </div>
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Buscar produtos..."
+                  id="searchInput"
+                />
+              </div>
+            </div>
+            <div class="col-md-4 mt-2 mt-md-0">
+              <select class="form-control" id="categoryFilter">
+                <option value="">Todas as categorias</option>
+                <option value="smartphone">Smartphones</option>
+                <option value="notebook">Notebooks</option>
+                <option value="tablet">Tablets</option>
+                <option value="acessorio">Acessórios</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grid de Produtos -->
+      <div class="row" id="productGrid">
+        <div
+          class="col-lg-4 col-md-6 mb-4"
+          th:each="produto : ${eletronicosList}"
+        >
+          <div class="product-card">
+            <!-- Badge de Categoria -->
+            <div class="category-badge" th:text="${produto.categoria}"></div>
+
+            <!-- Badge de Estoque -->
+            <div class="stock-badge" th:if="${produto.nivelEstoque <= 5}">
+              <i class="fas fa-exclamation-triangle"></i> Últimas unidades
+            </div>
+
+            <!-- Imagem do Produto -->
+            <div class="product-image-container">
+              <div
+                th:if="${produto.imagemUrl != null and !#strings.isEmpty(produto.imagemUrl)}"
+              >
+                <img
+                  th:src="${produto.imagemUrl}"
+                  th:alt="${produto.titulo}"
+                  class="product-image"
+                  data-toggle="modal"
+                  th:data-target="${'#imagemModal-' + produto.id}"
+                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                />
+                <div class="no-image-placeholder" style="display: none">
+                  <i class="fas fa-image fa-3x"></i>
+                  <p class="mt-2">Sem imagem</p>
+                </div>
+              </div>
+              <div
+                th:unless="${produto.imagemUrl != null and !#strings.isEmpty(produto.imagemUrl)}"
+                class="no-image-placeholder"
+              >
+                <i class="fas fa-image fa-3x"></i>
+                <p class="mt-2">Sem imagem</p>
+              </div>
+            </div>
+
+            <!-- Informações do Produto -->
+            <div class="product-info">
+              <h5 class="product-title" th:text="${produto.titulo}"></h5>
+
+              <!-- Preço -->
+              <div class="price-section">
+                <span
+                  class="current-price"
+                  th:text="${'R$ ' + #numbers.formatDecimal(produto.valorBase, 1, 'POINT', 2, 'COMMA')}"
+                ></span>
+                <small class="price-installments">ou 12x sem juros</small>
+              </div>
+
+              <!-- Estoque -->
+              <div class="stock-info">
+                <i class="fas fa-box mr-1"></i>
+                <span th:text="${produto.nivelEstoque}"></span>
+                <small class="text-muted"> em estoque</small>
+              </div>
+
+              <!-- Recursos principais (resumo) -->
+              <div
+                class="product-features"
+                th:if="${produto.recursosAdicionais != null and !#strings.isEmpty(produto.recursosAdicionais)}"
+              >
+                <small
+                  class="text-muted"
+                  th:text="${#strings.abbreviate(produto.recursosAdicionais, 60)}"
+                ></small>
+              </div>
+            </div>
+
+            <!-- Ações do Produto -->
+            <div class="product-actions">
+              <!-- Botão Adicionar ao Carrinho (apenas para usuários) -->
+              <button
+                sec:authorize="hasAuthority('user')"
+                type="button"
+                class="btn btn-primary btn-add-cart"
+                th:data-product-id="${produto.id}"
+                th:data-product-title="${produto.titulo}"
+                th:data-product-price="${produto.valorBase}"
+                th:disabled="${produto.nivelEstoque <= 0}"
+              >
+                <i class="fas fa-shopping-cart mr-1"></i>
+                <span th:if="${produto.nivelEstoque > 0}"
+                  >Adicionar ao Carrinho</span
+                >
+                <span th:if="${produto.nivelEstoque <= 0}">Indisponível</span>
+              </button>
+
+              <!-- Botão de Detalhes (para todos) -->
+              <button
+                type="button"
+                class="btn btn-outline-info btn-details"
+                data-toggle="modal"
+                th:data-target="${'#detalhesModal-' + produto.id}"
+              >
+                <i class="fas fa-eye mr-1"></i>Ver Detalhes
+              </button>
+
+              <!-- Botões Admin (apenas para administradores) -->
+              <div sec:authorize="hasAuthority('Admin')" class="admin-actions">
+                <div class="btn-group w-100 mt-2" role="group">
+                  <a
+                    th:href="@{/techcatalog/edit/{id}(id=${produto.id})}"
+                    class="btn btn-sm btn-warning"
+                    title="Editar Produto"
+                  >
+                    <i class="fas fa-edit mr-1"></i>Editar
+                  </a>
+                  <a
+                    th:href="@{/techcatalog/delete/{id}(id=${produto.id})}"
+                    class="btn btn-sm btn-danger"
+                    title="Excluir Produto"
+                    onclick="return confirm('Tem certeza que deseja excluir este produto?')"
+                  >
+                    <i class="fas fa-trash mr-1"></i>Excluir
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div class="table-responsive">
-          <table class="table table-striped table-hover">
-            <thead class="thead-dark">
-              <tr>
-                <th scope="col" class="text-center">
-                  <i class="fas fa-image mr-1"></i>Imagem
-                </th>
-                <th scope="col">
-                  <i class="fas fa-hashtag mr-1"></i>ID
-                </th>
-                <th scope="col">
-                  <i class="fas fa-tag mr-1"></i>Título
-                </th>
-                <th scope="col">
-                  <i class="fas fa-dollar-sign mr-1"></i>Valor Base
-                </th>
-                <th scope="col">
-                  <i class="fas fa-clipboard-list mr-1"></i>Categoria
-                </th>
-                <th scope="col">
-                  <i class="fas fa-box mr-1"></i>Estoque
-                </th>
-                <th scope="col" class="text-center">
-                  <i class="fas fa-cogs mr-1"></i>Ações
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr th:each="eletronicos : ${eletronicosList}">
-                <td class="text-center">
-                  <div th:if="${eletronicos.imagemUrl != null and !#strings.isEmpty(eletronicos.imagemUrl)}">
-                    <img th:src="${eletronicos.imagemUrl}" 
-                         th:alt="${eletronicos.titulo}"
-                         class="produto-imagem"
-                         data-toggle="modal"
-                         th:data-target="${'#imagemModal-' + eletronicos.id}"
-                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                    <div class="sem-imagem" style="display: none;">
-                      <i class="fas fa-image fa-lg"></i>
+        <!-- Mensagem quando não há produtos -->
+        <div class="col-12" th:if="${#lists.isEmpty(eletronicosList)}">
+          <div class="empty-state">
+            <i class="fas fa-shopping-bag fa-4x mb-3"></i>
+            <h3>Nenhum produto encontrado</h3>
+            <p class="text-muted">Não há produtos cadastrados no momento.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Paginação (se necessário) -->
+      <nav aria-label="Navegação de páginas" class="mt-4">
+        <ul class="pagination justify-content-center">
+          <li class="page-item disabled">
+            <a class="page-link" href="#" tabindex="-1">Anterior</a>
+          </li>
+          <li class="page-item active">
+            <a class="page-link" href="#">1</a>
+          </li>
+          <li class="page-item">
+            <a class="page-link" href="#">2</a>
+          </li>
+          <li class="page-item">
+            <a class="page-link" href="#">3</a>
+          </li>
+          <li class="page-item">
+            <a class="page-link" href="#">Próximo</a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+
+    <!-- Modal de Carrinho -->
+    <div class="modal fade" id="cartModal" tabindex="-1" role="dialog">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header bg-success text-white">
+            <h5 class="modal-title">
+              <i class="fas fa-check-circle mr-2"></i>Produto Adicionado ao
+              Carrinho!
+            </h5>
+            <button type="button" class="close text-white" data-dismiss="modal">
+              <span>&times;</span>
+            </button>
+          </div>
+          <div class="modal-body text-center">
+            <i class="fas fa-shopping-cart fa-3x text-success mb-3"></i>
+            <h6 id="cartProductName"></h6>
+            <p>foi adicionado ao seu carrinho com sucesso!</p>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-dismiss="modal"
+            >
+              Continuar Comprando
+            </button>
+            <a href="#" class="btn btn-success">
+              <i class="fas fa-shopping-cart mr-1"></i>Ver Carrinho
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modais de Imagem -->
+    <div
+      th:each="produto : ${eletronicosList}"
+      th:if="${produto.imagemUrl != null and !#strings.isEmpty(produto.imagemUrl)}"
+      th:id="${'imagemModal-' + produto.id}"
+      class="modal fade"
+    >
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" th:text="${produto.titulo}"></h5>
+            <button type="button" class="close" data-dismiss="modal">
+              <span>&times;</span>
+            </button>
+          </div>
+          <div class="modal-body text-center">
+            <img
+              th:src="${produto.imagemUrl}"
+              th:alt="${produto.titulo}"
+              class="img-fluid rounded"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modais de Detalhes -->
+    <div
+      th:each="produto : ${eletronicosList}"
+      th:id="${'detalhesModal-' + produto.id}"
+      class="modal fade"
+    >
+      <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title">
+              <i class="fas fa-info-circle mr-2"></i>Detalhes do Produto
+            </h5>
+            <button type="button" class="close text-white" data-dismiss="modal">
+              <span>&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="row">
+              <!-- Imagem do Produto -->
+              <div class="col-md-5">
+                <div
+                  th:if="${produto.imagemUrl != null and !#strings.isEmpty(produto.imagemUrl)}"
+                >
+                  <img
+                    th:src="${produto.imagemUrl}"
+                    th:alt="${produto.titulo}"
+                    class="img-fluid rounded shadow"
+                  />
+                </div>
+                <div
+                  th:unless="${produto.imagemUrl != null and !#strings.isEmpty(produto.imagemUrl)}"
+                  class="no-image-large"
+                >
+                  <i class="fas fa-image fa-4x"></i>
+                  <p class="mt-3">Imagem não disponível</p>
+                </div>
+              </div>
+
+              <!-- Informações do Produto -->
+              <div class="col-md-7">
+                <h3 th:text="${produto.titulo}"></h3>
+                <p class="text-muted mb-3" th:text="${produto.categoria}"></p>
+
+                <!-- Preço Destacado -->
+                <div class="price-highlight">
+                  <h2
+                    class="text-primary"
+                    th:text="${'R$ ' + #numbers.formatDecimal(produto.valorBase, 1, 'POINT', 2, 'COMMA')}"
+                  ></h2>
+                  <small class="text-muted"
+                    >ou 12x de R$ [[${#numbers.formatDecimal(produto.valorBase /
+                    12, 1, 'POINT', 2, 'COMMA')}]] sem juros</small
+                  >
+                </div>
+
+                <!-- Estoque -->
+                <div class="stock-status mb-3">
+                  <span
+                    class="badge badge-success"
+                    th:if="${produto.nivelEstoque > 10}"
+                  >
+                    <i class="fas fa-check mr-1"></i>Em estoque
+                    ([[${produto.nivelEstoque}]] unidades)
+                  </span>
+                  <span
+                    class="badge badge-warning"
+                    th:if="${produto.nivelEstoque <= 10 and produto.nivelEstoque > 0}"
+                  >
+                    <i class="fas fa-exclamation-triangle mr-1"></i>Últimas
+                    [[${produto.nivelEstoque}]] unidades
+                  </span>
+                  <span
+                    class="badge badge-danger"
+                    th:if="${produto.nivelEstoque <= 0}"
+                  >
+                    <i class="fas fa-times mr-1"></i>Indisponível
+                  </span>
+                </div>
+
+                <!-- Recursos Principais -->
+                <div
+                  class="features-section mb-4"
+                  th:if="${produto.recursosAdicionais != null and !#strings.isEmpty(produto.recursosAdicionais)}"
+                >
+                  <h6>
+                    <i class="fas fa-star text-warning mr-1"></i>Recursos
+                    Principais
+                  </h6>
+                  <p th:text="${produto.recursosAdicionais}"></p>
+                </div>
+
+                <!-- Locais Disponíveis -->
+                <div
+                  class="locations-section mb-4"
+                  th:if="${produto.locaisDisponiveis != null and !#strings.isEmpty(produto.locaisDisponiveis)}"
+                >
+                  <h6>
+                    <i class="fas fa-map-marker-alt text-info mr-1"></i
+                    >Disponível em
+                  </h6>
+                  <p th:text="${produto.locaisDisponiveis}"></p>
+                </div>
+
+                <!-- Ações -->
+                <div class="product-actions-modal">
+                  <button
+                    sec:authorize="hasAuthority('user')"
+                    type="button"
+                    class="btn btn-success btn-lg btn-add-cart"
+                    th:data-product-id="${produto.id}"
+                    th:data-product-title="${produto.titulo}"
+                    th:data-product-price="${produto.valorBase}"
+                    th:disabled="${produto.nivelEstoque <= 0}"
+                  >
+                    <i class="fas fa-shopping-cart mr-2"></i>
+                    <span th:if="${produto.nivelEstoque > 0}"
+                      >Adicionar ao Carrinho</span
+                    >
+                    <span th:if="${produto.nivelEstoque <= 0}"
+                      >Produto Indisponível</span
+                    >
+                  </button>
+
+                  <div
+                    sec:authorize="hasAuthority('Admin')"
+                    class="admin-actions-modal mt-3"
+                  >
+                    <div class="btn-group" role="group">
+                      <a
+                        th:href="@{/techcatalog/edit/{id}(id=${produto.id})}"
+                        class="btn btn-warning"
+                      >
+                        <i class="fas fa-edit mr-1"></i>Editar Produto
+                      </a>
+                      <a
+                        th:href="@{/techcatalog/delete/{id}(id=${produto.id})}"
+                        class="btn btn-danger"
+                        onclick="return confirm('Tem certeza que deseja excluir este produto?')"
+                      >
+                        <i class="fas fa-trash mr-1"></i>Excluir Produto
+                      </a>
                     </div>
                   </div>
-                  <div th:unless="${eletronicos.imagemUrl != null and !#strings.isEmpty(eletronicos.imagemUrl)}" 
-                       class="sem-imagem">
-                    <i class="fas fa-image fa-lg"></i>
-                  </div>
-                </td>
-                <td th:text="${eletronicos.id}"></td>
-                <td th:text="${eletronicos.titulo}"></td>
-                <td th:text="${'R$ ' + #numbers.formatDecimal(eletronicos.valorBase, 1, 'POINT', 2, 'COMMA')}"></td>
-                <td th:text="${eletronicos.categoria}"></td>
-                <td>
-                  <span th:text="${eletronicos.nivelEstoque}"></span>
-                  <small class="text-muted"> unidades</small>
-                </td>
-                <td class="text-center">
-                  <div class="btn-group" role="group">
-                    <button type="button" class="btn btn-sm btn-info" data-toggle="modal" title="Detalhes"
-                      th:data-target="${'#detalhesModal-' + eletronicos.id}">
-                      <i class="fas fa-eye"></i>
-                    </button>
-                    <a th:href="@{/techcatalog/edit/{id}(id=${eletronicos.id})}" class="btn btn-sm btn-warning" 
-                      title="Editar">
-                      <i class="fas fa-edit"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- Especificações Técnicas -->
+            <div class="row mt-4">
+              <div class="col-12">
+                <ul class="nav nav-tabs" th:id="${'productTabs-' + produto.id}" role="tablist">
+                  <li class="nav-item" role="presentation">
+                    <a
+                      class="nav-link active"
+                      th:id="${'specs-tab-' + produto.id}"
+                      data-toggle="tab"
+                      th:href="${'#specs-' + produto.id}"
+                      role="tab"
+                      th:aria-controls="${'specs-' + produto.id}"
+                      aria-selected="true"
+                    >
+                      <i class="fas fa-cogs mr-1"></i>Especificações
                     </a>
-                    <a th:href="@{/techcatalog/delete/{id}(id=${eletronicos.id})}" class="btn btn-sm btn-danger"
-                      title="Excluir" onclick="return confirm('Tem certeza que deseja excluir este item?')">
-                      <i class="fas fa-trash"></i>
+                  </li>
+                  <li
+                    class="nav-item"
+                    role="presentation"
+                    th:if="${produto.descricaoProduto != null and !#strings.isEmpty(produto.descricaoProduto)}"
+                  >
+                    <a
+                      class="nav-link"
+                      th:id="${'description-tab-' + produto.id}"
+                      data-toggle="tab"
+                      th:href="${'#description-' + produto.id}"
+                      role="tab"
+                      th:aria-controls="${'description-' + produto.id}"
+                      aria-selected="false"
+                    >
+                      <i class="fas fa-align-left mr-1"></i>Descrição
                     </a>
+                  </li>
+                </ul>
+                <div class="tab-content" th:id="${'productTabsContent-' + produto.id}">
+                  <div
+                    class="tab-pane fade show active"
+                    th:id="${'specs-' + produto.id}"
+                    role="tabpanel"
+                    th:aria-labelledby="${'specs-tab-' + produto.id}"
+                  >
+                    <div class="specs-content">
+                      <p th:text="${produto.especificacaoTecnica}"></p>
+                    </div>
                   </div>
-                </td>
-              </tr>
-              <tr th:if="${#lists.isEmpty(eletronicosList)}">
-                <td colspan="7" class="text-center text-muted">
-                  <i class="fas fa-inbox fa-2x mb-2"></i><br>
-                  Nenhum eletrônico cadastrado.
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                  <div
+                    class="tab-pane fade"
+                    th:id="${'description-' + produto.id}"
+                    role="tabpanel"
+                    th:aria-labelledby="${'description-tab-' + produto.id}"
+                    th:if="${produto.descricaoProduto != null and !#strings.isEmpty(produto.descricaoProduto)}"
+                  >
+                    <div class="description-content">
+                      <p th:text="${produto.descricaoProduto}"></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-dismiss="modal"
+            >
+              <i class="fas fa-times mr-1"></i>Fechar
+            </button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Modais de Imagem -->
-  <div th:each="eletronicos : ${eletronicosList}" 
-       th:if="${eletronicos.imagemUrl != null and !#strings.isEmpty(eletronicos.imagemUrl)}"
-       th:id="${'imagemModal-' + eletronicos.id}" 
-       class="modal fade">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" th:text="${eletronicos.titulo}"></h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body text-center">
-          <img th:src="${eletronicos.imagemUrl}" 
-               th:alt="${eletronicos.titulo}"
-               class="modal-imagem">
-        </div>
-      </div>
-    </div>
-  </div>
+    <!-- Scripts -->
+    <div th:replace="fragments/head :: scripts"></div>
 
-  <!-- Modais de Detalhes -->
-  <div th:each="eletronicos : ${eletronicosList}" th:id="${'detalhesModal-' + eletronicos.id}" class="modal fade">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header bg-info text-white">
-          <h5 class="modal-title">
-            <i class="fas fa-info-circle mr-2"></i>Detalhes do Eletrônico
-          </h5>
-          <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <!-- Seção da Imagem no Modal de Detalhes -->
-          <div th:if="${eletronicos.imagemUrl != null and !#strings.isEmpty(eletronicos.imagemUrl)}" 
-               class="row mb-3">
-            <div class="col-12 text-center">
-              <img th:src="${eletronicos.imagemUrl}" 
-                   th:alt="${eletronicos.titulo}"
-                   class="img-fluid rounded shadow"
-                   style="max-height: 200px; object-fit: contain;">
-            </div>
-          </div>
-          
-          <div class="row">
-            <div class="col-md-6">
-              <h5 class="text-primary">
-                <i class="fas fa-info-circle mr-1"></i>Informações Básicas
-              </h5>
-              <dl class="row">
-                <dt class="col-sm-4">ID:</dt>
-                <dd class="col-sm-8" th:text="${eletronicos.id}"></dd>
+    <script>
+      // Funcionalidade do carrinho
+      document.addEventListener("DOMContentLoaded", function () {
+        const addToCartButtons = document.querySelectorAll(".btn-add-cart");
 
-                <dt class="col-sm-4">Título:</dt>
-                <dd class="col-sm-8" th:text="${eletronicos.titulo}"></dd>
+        addToCartButtons.forEach((button) => {
+          button.addEventListener("click", function () {
+            const productId = this.dataset.productId;
+            const productTitle = this.dataset.productTitle;
+            const productPrice = this.dataset.productPrice;
 
-                <dt class="col-sm-4">Valor Base:</dt>
-                <dd class="col-sm-8"
-                  th:text="${'R$ ' + #numbers.formatDecimal(eletronicos.valorBase, 1, 'POINT', 2, 'COMMA')}"></dd>
+            // Aqui você pode implementar a lógica para adicionar ao carrinho
+            // Por exemplo, fazer uma requisição AJAX para o servidor
 
-                <dt class="col-sm-4">Categoria:</dt>
-                <dd class="col-sm-8" th:text="${eletronicos.categoria}"></dd>
+            // Mostrar modal de confirmação
+            document.getElementById("cartProductName").textContent =
+              productTitle;
+            $("#cartModal").modal("show");
 
-                <dt class="col-sm-4">Estoque:</dt>
-                <dd class="col-sm-8">
-                  <span th:text="${eletronicos.nivelEstoque}"></span> unidades
-                </dd>
-                
-                <dt class="col-sm-4" th:if="${eletronicos.imagemUrl != null and !#strings.isEmpty(eletronicos.imagemUrl)}">URL da Imagem:</dt>
-                <dd class="col-sm-8" th:if="${eletronicos.imagemUrl != null and !#strings.isEmpty(eletronicos.imagemUrl)}">
-                  <a th:href="${eletronicos.imagemUrl}" target="_blank" class="text-truncate d-block" style="max-width: 200px;">
-                    <i class="fas fa-external-link-alt mr-1"></i>
-                    <span th:text="${eletronicos.imagemUrl}"></span>
-                  </a>
-                </dd>
-              </dl>
-            </div>
-            <div class="col-md-6">
-              <h5 class="text-success">
-                <i class="fas fa-plus-circle mr-1"></i>Informações Adicionais
-              </h5>
-              <dl class="row">
-                <dt class="col-sm-4">Recursos:</dt>
-                <dd class="col-sm-8" th:text="${eletronicos.recursosAdicionais}"></dd>
+            // Animação do botão
+            this.innerHTML = '<i class="fas fa-check mr-1"></i>Adicionado!';
+            this.classList.remove("btn-primary", "btn-success");
+            this.classList.add("btn-success");
 
-                <dt class="col-sm-4">Locais:</dt>
-                <dd class="col-sm-8" th:text="${eletronicos.locaisDisponiveis}"></dd>
-              </dl>
-            </div>
-          </div>
+            setTimeout(() => {
+              this.innerHTML =
+                '<i class="fas fa-shopping-cart mr-1"></i>Adicionar ao Carrinho';
+              this.classList.remove("btn-success");
+              this.classList.add("btn-primary");
+            }, 2000);
+          });
+        });
 
-          <div class="row mt-3">
-            <div class="col-12">
-              <h5 class="text-warning">
-                <i class="fas fa-file-alt mr-1"></i>Especificação Técnica
-              </h5>
-              <p th:text="${eletronicos.especificacaoTecnica}" class="border p-3 bg-light rounded"></p>
-            </div>
-          </div>
+        // Funcionalidade de busca
+        const searchInput = document.getElementById("searchInput");
+        const categoryFilter = document.getElementById("categoryFilter");
 
-          <div class="row mt-3" th:if="${eletronicos.descricaoProduto != null and !#strings.isEmpty(eletronicos.descricaoProduto)}">
-            <div class="col-12">
-              <h5 class="text-secondary">
-                <i class="fas fa-align-left mr-1"></i>Descrição do Produto
-              </h5>
-              <p th:text="${eletronicos.descricaoProduto}" class="border p-3 bg-light rounded"></p>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <a th:href="@{/techcatalog/edit/{id}(id=${eletronicos.id})}" class="btn btn-warning">
-            <i class="fas fa-edit mr-1"></i>Editar
-          </a>
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">
-            <i class="fas fa-times mr-1"></i>Fechar
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
+        function filterProducts() {
+          const searchTerm = searchInput.value.toLowerCase();
+          const selectedCategory = categoryFilter.value.toLowerCase();
+          const productCards = document.querySelectorAll(
+            ".col-lg-4.col-md-6.mb-4"
+          );
 
-  <!-- Scripts -->
-  <div th:replace="fragments/head :: scripts"></div>
-</body>
+          productCards.forEach((card) => {
+            const title = card
+              .querySelector(".product-title")
+              .textContent.toLowerCase();
+            const category = card
+              .querySelector(".category-badge")
+              .textContent.toLowerCase();
 
+            const matchesSearch = title.includes(searchTerm);
+            const matchesCategory =
+              selectedCategory === "" || category.includes(selectedCategory);
+
+            if (matchesSearch && matchesCategory) {
+              card.style.display = "block";
+            } else {
+              card.style.display = "none";
+            }
+          });
+        }
+
+        searchInput.addEventListener("input", filterProducts);
+        categoryFilter.addEventListener("change", filterProducts);
+      });
+    </script>
+  </body>
 </html>
