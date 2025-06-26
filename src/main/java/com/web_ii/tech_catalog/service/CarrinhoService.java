@@ -147,7 +147,7 @@ public class CarrinhoService {
         List<Carrinho> itens = carrinhoRepository.findByIdUserWithProduto(idUser);
         
         for (Carrinho item : itens) {
-            if (item.getTechCatalog().getNivelEstoque() < item.getQuantidade()) {
+            if (item.getProduto().getNivelEstoque() < item.getQuantidade()) {
                 return false;
             }
         }
