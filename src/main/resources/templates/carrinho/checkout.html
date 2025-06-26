@@ -1,155 +1,541 @@
 <!DOCTYPE html>
-<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="fragments/head :: head('Finalizar Compra')">
+<html lang="pt-br">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Finalizar Compra</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        .checkout-step {
+        :root {
+            --primary-color: #6366f1;
+            --primary-dark: #4f46e5;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--gray-50) 0%, #fff 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--gray-200);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .checkout-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        /* Progress Steps */
+        .progress-steps {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 3rem;
+            padding: 0 1rem;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .step-circle {
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto;
+            font-size: 1.2rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-bottom: 0.5rem;
         }
-        .step-active {
-            background-color: #007bff;
+
+        .step-completed .step-circle {
+            background: var(--success-color);
             color: white;
+            transform: scale(1.1);
         }
-        .step-completed {
-            background-color: #28a745;
+
+        .step-active .step-circle {
+            background: var(--primary-color);
             color: white;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+            animation: pulse 2s infinite;
         }
-        .step-inactive {
-            background-color: #e9ecef;
-            color: #6c757d;
+
+        .step-inactive .step-circle {
+            background: var(--gray-200);
+            color: var(--gray-500);
         }
-        .order-item {
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 10px;
-        }
-        .payment-method {
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            padding: 15px;
-            cursor: pointer;
+
+        .step-line {
+            width: 80px;
+            height: 3px;
+            margin: 0 1rem;
+            border-radius: 2px;
             transition: all 0.3s ease;
         }
+
+        .step-line.completed {
+            background: var(--success-color);
+        }
+
+        .step-line.inactive {
+            background: var(--gray-200);
+        }
+
+        .step-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--gray-600);
+        }
+
+        .step-active .step-label {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.4); }
+            50% { box-shadow: 0 0 30px rgba(99, 102, 241, 0.6); }
+            100% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.4); }
+        }
+
+        /* Cards */
+        .card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            border-radius: 16px 16px 0 0 !important;
+            padding: 1.5rem;
+            border: none;
+        }
+
+        .card-header h5 {
+            margin: 0;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-body {
+            padding: 2rem;
+        }
+
+        /* Form Styling */
+        .form-label {
+            font-weight: 500;
+            color: var(--gray-700);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            background: var(--gray-50);
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            background: white;
+        }
+
+        .form-control.is-invalid {
+            border-color: var(--danger-color);
+            background: #fef2f2;
+        }
+
+        .form-control.is-valid {
+            border-color: var(--success-color);
+            background: #f0fdf4;
+        }
+
+        /* Payment Methods */
+        .payment-method {
+            border: 2px solid var(--gray-200);
+            border-radius: 16px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+            margin-bottom: 1rem;
+        }
+
         .payment-method:hover {
-            border-color: #007bff;
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.15);
         }
+
         .payment-method.selected {
-            border-color: #007bff;
-            background-color: #f0f8ff;
+            border-color: var(--primary-color);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(99, 102, 241, 0.1));
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.2);
         }
+
+        .payment-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-right: 1rem;
+        }
+
+        .payment-icon.credit {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .payment-icon.pix {
+            background: linear-gradient(135deg, #00d4aa, #00b894);
+            color: white;
+        }
+
+        /* Order Summary */
         .summary-card {
             position: sticky;
-            top: 100px;
+            top: 2rem;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .summary-header {
+            background: linear-gradient(135deg, var(--gray-800), var(--gray-900));
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .order-item {
+            background: var(--gray-50);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--primary-color);
+            transition: all 0.3s ease;
+        }
+
+        .order-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .price-row:last-child {
+            border-bottom: 2px solid var(--primary-color);
+            padding-top: 1rem;
+            margin-top: 1rem;
+        }
+
+        .total-price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--success-color);
+        }
+
+        /* Buttons */
+        .btn {
+            border-radius: 12px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success-color), #059669);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-outline-secondary {
+            border: 2px solid var(--gray-300);
+            color: var(--gray-600);
+            background: transparent;
+        }
+
+        .btn-outline-secondary:hover {
+            background: var(--gray-600);
+            border-color: var(--gray-600);
+            color: white;
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .loading-spinner {
+            text-align: center;
+        }
+
+        .spinner-border {
+            width: 4rem;
+            height: 4rem;
+            border-width: 0.4em;
+        }
+
+        /* Security Badge */
+        .security-badge {
+            background: linear-gradient(135deg, var(--success-color), #059669);
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        /* Modal Improvements */
+        .modal-content {
+            border-radius: 20px;
+            border: none;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--success-color), #059669);
+            color: white;
+            border: none;
+            padding: 2rem;
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .success-icon {
+            color: var(--success-color);
+            font-size: 5rem;
+            margin-bottom: 1rem;
+            animation: bounce 1s ease-in-out;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 53%, 80%, 100% { transform: translate3d(0,0,0); }
+            40%, 43% { transform: translate3d(0,-30px,0); }
+            70% { transform: translate3d(0,-15px,0); }
+            90% { transform: translate3d(0,-4px,0); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .checkout-container {
+                padding: 1rem;
+            }
+            
+            .progress-steps {
+                margin-bottom: 2rem;
+            }
+            
+            .step-line {
+                width: 40px;
+                margin: 0 0.5rem;
+            }
+            
+            .card-body {
+                padding: 1.5rem;
+            }
+            
+            .summary-card {
+                position: static;
+                margin-top: 2rem;
+            }
+        }
+
+        /* Floating Labels Animation */
+        .form-floating {
+            position: relative;
+        }
+
+        .form-floating .form-control {
+            height: calc(3.5rem + 2px);
+            padding: 1rem 0.75rem;
+        }
+
+        .form-floating label {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            padding: 1rem 0.75rem;
+            pointer-events: none;
+            border: 1px solid transparent;
+            transform-origin: 0 0;
+            transition: opacity 0.1s ease-in-out, transform 0.1s ease-in-out;
+        }
+
+        .form-floating .form-control:focus ~ label,
+        .form-floating .form-control:not(:placeholder-shown) ~ label {
+            opacity: 0.65;
+            transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
         }
     </style>
 </head>
-<body class="bg-light">
-    <!-- Navbar -->
-    <nav th:replace="fragments/navbar :: navbar('')"></nav>
-    
-    <div class="container mt-4 mb-5">
-        <!-- Progress Steps -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="d-flex justify-content-center">
-                    <div class="d-flex align-items-center">
-                        <div class="text-center">
-                            <div class="checkout-step step-completed">
-                                <i class="fas fa-shopping-cart"></i>
-                            </div>
-                            <small class="text-muted">Carrinho</small>
-                        </div>
-                        <div class="mx-3" style="width: 50px; height: 2px; background-color: #28a745;"></div>
-                        <div class="text-center">
-                            <div class="checkout-step step-active">
-                                <i class="fas fa-credit-card"></i>
-                            </div>
-                            <small class="text-primary">Pagamento</small>
-                        </div>
-                        <div class="mx-3" style="width: 50px; height: 2px; background-color: #e9ecef;"></div>
-                        <div class="text-center">
-                            <div class="checkout-step step-inactive">
-                                <i class="fas fa-check"></i>
-                            </div>
-                            <small class="text-muted">Confirmação</small>
-                        </div>
-                    </div>
+<body>
+     <nav th:replace="fragments/navbar :: navbar('carrinho')"></nav>
+
+
+    <div class="checkout-container" style="margin-top: 80px;">
+        <!-- Progress Steps Melhorado -->
+        <div class="progress-steps">
+            <div class="step step-completed">
+                <div class="step-circle">
+                    <i class="fas fa-check"></i>
                 </div>
+                <span class="step-label">Carrinho</span>
+            </div>
+            <div class="step-line completed"></div>
+            <div class="step step-active">
+                <div class="step-circle">
+                    <i class="fas fa-credit-card"></i>
+                </div>
+                <span class="step-label">Pagamento</span>
+            </div>
+            <div class="step-line inactive"></div>
+            <div class="step step-inactive">
+                <div class="step-circle">
+                    <i class="fas fa-gift"></i>
+                </div>
+                <span class="step-label">Confirmação</span>
             </div>
         </div>
 
-        <div class="row">
-            <!-- Formulário de Checkout -->
+        <div class="row g-4">
+            <!-- Formulário Principal -->
             <div class="col-lg-8">
                 <form id="checkoutForm">
                     <!-- Dados de Entrega -->
                     <div class="card mb-4">
                         <div class="card-header">
-                            <h5 class="mb-0"><i class="fas fa-map-marker-alt mr-2"></i>Dados de Entrega</h5>
+                            <h5><i class="fas fa-map-marker-alt"></i> Dados de Entrega</h5>
                         </div>
                         <div class="card-body">
-                            <div class="row">
+                            <div class="row g-3">
                                 <div class="col-md-6">
-                                    <div class="form-group">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="nomeCompleto" placeholder="Nome Completo" required>
                                         <label for="nomeCompleto">Nome Completo *</label>
-                                        <input type="text" class="form-control" id="nomeCompleto" required>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <div class="form-group">
+                                    <div class="form-floating">
+                                        <input type="tel" class="form-control" id="telefone" placeholder="Telefone" required>
                                         <label for="telefone">Telefone *</label>
-                                        <input type="tel" class="form-control" id="telefone" required>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="row">
                                 <div class="col-md-3">
-                                    <div class="form-group">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="cep" placeholder="CEP" required>
                                         <label for="cep">CEP *</label>
-                                        <input type="text" class="form-control" id="cep" required>
                                     </div>
                                 </div>
                                 <div class="col-md-7">
-                                    <div class="form-group">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="endereco" placeholder="Endereço" required>
                                         <label for="endereco">Endereço *</label>
-                                        <input type="text" class="form-control" id="endereco" required>
                                     </div>
                                 </div>
                                 <div class="col-md-2">
-                                    <div class="form-group">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="numero" placeholder="Número" required>
                                         <label for="numero">Número *</label>
-                                        <input type="text" class="form-control" id="numero" required>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="row">
                                 <div class="col-md-4">
-                                    <div class="form-group">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="complemento" placeholder="Complemento">
                                         <label for="complemento">Complemento</label>
-                                        <input type="text" class="form-control" id="complemento">
                                     </div>
                                 </div>
                                 <div class="col-md-4">
-                                    <div class="form-group">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="bairro" placeholder="Bairro" required>
                                         <label for="bairro">Bairro *</label>
-                                        <input type="text" class="form-control" id="bairro" required>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
-                                    <div class="form-group">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="cidade" placeholder="Cidade" required>
                                         <label for="cidade">Cidade *</label>
-                                        <input type="text" class="form-control" id="cidade" required>
                                     </div>
                                 </div>
                             </div>
@@ -159,72 +545,79 @@
                     <!-- Forma de Pagamento -->
                     <div class="card mb-4">
                         <div class="card-header">
-                            <h5 class="mb-0"><i class="fas fa-credit-card mr-2"></i>Forma de Pagamento</h5>
+                            <h5><i class="fas fa-credit-card"></i> Forma de Pagamento</h5>
                         </div>
                         <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
+                            <div class="row g-3">
+                                <div class="col-md-6">
                                     <div class="payment-method" onclick="selectPayment('cartao')">
                                         <div class="d-flex align-items-center">
-                                            <input type="radio" name="formaPagamento" value="cartao" id="cartao" class="mr-3">
-                                            <div>
-                                                <i class="fas fa-credit-card fa-2x text-primary mr-3"></i>
-                                                <strong>Cartão de Crédito</strong>
-                                                <br>
-                                                <small class="text-muted">Visa, Mastercard, Elo</small>
+                                            <div class="payment-icon credit">
+                                                <i class="fas fa-credit-card"></i>
                                             </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="mb-1">Cartão de Crédito</h6>
+                                                <p class="text-muted mb-0 small">Visa, Mastercard, Elo</p>
+                                                <p class="text-success mb-0 small">
+                                                    <i class="fas fa-shield-alt me-1"></i>
+                                                    Parcelamento sem juros
+                                                </p>
+                                            </div>
+                                            <input type="radio" name="formaPagamento" value="cartao" id="cartao" class="form-check-input">
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-6 mb-3">
+                                <div class="col-md-6">
                                     <div class="payment-method" onclick="selectPayment('pix')">
                                         <div class="d-flex align-items-center">
-                                            <input type="radio" name="formaPagamento" value="pix" id="pix" class="mr-3">
-                                            <div>
-                                                <i class="fas fa-qrcode fa-2x text-success mr-3"></i>
-                                                <strong>PIX</strong>
-                                                <br>
-                                                <small class="text-muted">Pagamento instantâneo</small>
+                                            <div class="payment-icon pix">
+                                                <i class="fas fa-qrcode"></i>
                                             </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="mb-1">PIX</h6>
+                                                <p class="text-muted mb-0 small">Pagamento instantâneo</p>
+                                                <p class="text-success mb-0 small">
+                                                    <i class="fas fa-bolt me-1"></i>
+                                                    Aprovação imediata
+                                                </p>
+                                            </div>
+                                            <input type="radio" name="formaPagamento" value="pix" id="pix" class="form-check-input">
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             
-                            <!-- Detalhes do Cartão (aparece apenas se cartão for selecionado) -->
+                            <!-- Detalhes do Cartão -->
                             <div id="cartaoDetalhes" style="display: none;">
-                                <hr>
-                                <div class="row">
+                                <hr class="my-4">
+                                <div class="row g-3">
                                     <div class="col-md-6">
-                                        <div class="form-group">
+                                        <div class="form-floating">
+                                            <input type="text" class="form-control" id="numeroCartao" placeholder="Número do Cartão">
                                             <label for="numeroCartao">Número do Cartão *</label>
-                                            <input type="text" class="form-control" id="numeroCartao" placeholder="1234 5678 9012 3456">
                                         </div>
                                     </div>
                                     <div class="col-md-6">
-                                        <div class="form-group">
+                                        <div class="form-floating">
+                                            <input type="text" class="form-control" id="nomeCartao" placeholder="Nome no Cartão">
                                             <label for="nomeCartao">Nome no Cartão *</label>
-                                            <input type="text" class="form-control" id="nomeCartao">
                                         </div>
                                     </div>
-                                </div>
-                                <div class="row">
                                     <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label for="mesVencimento">Mês/Ano *</label>
+                                        <div class="form-floating">
                                             <input type="text" class="form-control" id="mesVencimento" placeholder="MM/AA">
+                                            <label for="mesVencimento">Validade *</label>
                                         </div>
                                     </div>
                                     <div class="col-md-4">
-                                        <div class="form-group">
+                                        <div class="form-floating">
+                                            <input type="text" class="form-control" id="cvv" placeholder="CVV">
                                             <label for="cvv">CVV *</label>
-                                            <input type="text" class="form-control" id="cvv" placeholder="123">
                                         </div>
                                     </div>
                                     <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label for="parcelas">Parcelas *</label>
-                                            <select class="form-control" id="parcelas">
+                                        <div class="form-floating">
+                                            <select class="form-select" id="parcelas">
                                                 <option value="1">1x sem juros</option>
                                                 <option value="2">2x sem juros</option>
                                                 <option value="3">3x sem juros</option>
@@ -232,6 +625,7 @@
                                                 <option value="5">5x sem juros</option>
                                                 <option value="6">6x sem juros</option>
                                             </select>
+                                            <label for="parcelas">Parcelas *</label>
                                         </div>
                                     </div>
                                 </div>
@@ -242,11 +636,12 @@
                     <!-- Observações -->
                     <div class="card mb-4">
                         <div class="card-header">
-                            <h5 class="mb-0"><i class="fas fa-comment mr-2"></i>Observações</h5>
+                            <h5><i class="fas fa-comment"></i> Observações</h5>
                         </div>
                         <div class="card-body">
-                            <div class="form-group">
-                                <textarea class="form-control" id="observacoes" rows="3" placeholder="Observações sobre a entrega (opcional)"></textarea>
+                            <div class="form-floating">
+                                <textarea class="form-control" id="observacoes" placeholder="Observações sobre a entrega" style="height: 100px"></textarea>
+                                <label for="observacoes">Observações sobre a entrega (opcional)</label>
                             </div>
                         </div>
                     </div>
@@ -255,65 +650,79 @@
 
             <!-- Resumo do Pedido -->
             <div class="col-lg-4">
-                <div class="card summary-card">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">Resumo do Pedido</h5>
+                <div class="summary-card">
+                    <div class="summary-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-receipt me-2"></i>
+                            Resumo do Pedido
+                        </h5>
                     </div>
                     <div class="card-body">
                         <!-- Itens do Pedido -->
-                        <div class="mb-3">
-                            <h6>Itens do Pedido</h6>
-                            <div th:each="item : ${itensCarrinho}" class="order-item">
+                        <div class="mb-4">
+                            <h6 class="mb-3">Itens do Pedido</h6>
+                            <div class="order-item">
                                 <div class="d-flex justify-content-between align-items-start">
                                     <div class="flex-grow-1">
-                                        <h6 class="mb-1" th:text="${item.produto.nome}"></h6>
+                                        <h6 class="mb-1">Produto Exemplo 1</h6>
                                         <small class="text-muted">
-                                            Qtd: <span th:text="${item.quantidade}"></span> x 
-                                            R$ <span th:text="${#numbers.formatDecimal(item.produto.preco, 1, 2)}"></span>
+                                            Qtd: 2 x R$ 99,90
                                         </small>
                                     </div>
-                                    <div class="text-right">
-                                        <strong>R$ <span th:text="${#numbers.formatDecimal(item.valorTotal, 1, 2)}"></span></strong>
+                                    <div class="text-end">
+                                        <strong>R$ 199,80</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="order-item">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1">Produto Exemplo 2</h6>
+                                        <small class="text-muted">
+                                            Qtd: 1 x R$ 149,90
+                                        </small>
+                                    </div>
+                                    <div class="text-end">
+                                        <strong>R$ 149,90</strong>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Resumo Financeiro -->
-                        <hr>
-                        <div class="d-flex justify-content-between mb-2">
+                        <div class="price-row">
                             <span>Subtotal:</span>
-                            <span>R$ <span th:text="${#numbers.formatDecimal(resumoCarrinho.subtotal, 1, 2)}"></span></span>
+                            <span>R$ 349,70</span>
                         </div>
-                        <div class="d-flex justify-content-between mb-2">
+                        <div class="price-row">
                             <span>Frete:</span>
                             <span class="text-success">Grátis</span>
                         </div>
-                        <div class="d-flex justify-content-between mb-2">
+                        <div class="price-row">
                             <span>Desconto:</span>
                             <span class="text-success">R$ 0,00</span>
                         </div>
-                        <hr>
-                        <div class="d-flex justify-content-between mb-3">
+                        <div class="price-row">
                             <strong>Total:</strong>
-                            <strong class="text-success h5">R$ <span th:text="${#numbers.formatDecimal(resumoCarrinho.total, 1, 2)}"></span></strong>
+                            <strong class="total-price">R$ 349,70</strong>
                         </div>
 
                         <!-- Botões de Ação -->
-                        <button type="button" class="btn btn-success btn-block btn-lg mb-3" onclick="finalizarPedido()">
-                            <i class="fas fa-check mr-2"></i>Confirmar Pedido
-                        </button>
-                        
-                        <a href="/carrinho" class="btn btn-outline-secondary btn-block">
-                            <i class="fas fa-arrow-left mr-2"></i>Voltar ao Carrinho
-                        </a>
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="button" class="btn btn-success btn-lg" onclick="finalizarPedido()">
+                                <i class="fas fa-check me-2"></i>
+                                Confirmar Pedido
+                            </button>
+                            <a href="/carrinho" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>
+                                Voltar ao Carrinho
+                            </a>
+                        </div>
 
                         <!-- Selo de Segurança -->
-                        <div class="text-center mt-3">
-                            <small class="text-muted">
-                                <i class="fas fa-lock mr-1"></i>
-                                Compra 100% segura e protegida
-                            </small>
+                        <div class="security-badge">
+                            <i class="fas fa-shield-alt me-2"></i>
+                            Compra 100% segura e protegida
                         </div>
                     </div>
                 </div>
@@ -322,26 +731,35 @@
     </div>
 
     <!-- Modal de Confirmação -->
-    <div class="modal fade" id="confirmacaoModal" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal fade" id="confirmacaoModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <div class="modal-header bg-success text-white">
+                <div class="modal-header">
                     <h5 class="modal-title">
-                        <i class="fas fa-check-circle mr-2"></i>Pedido Confirmado!
+                        <i class="fas fa-check-circle me-2"></i>
+                        Pedido Confirmado!
                     </h5>
                 </div>
                 <div class="modal-body text-center">
-                    <div class="mb-3">
-                        <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                    <div class="success-icon">
+                        <i class="fas fa-check-circle"></i>
                     </div>
-                    <h4>Obrigado pela sua compra!</h4>
-                    <p class="text-muted">Seu pedido foi recebido e está sendo processado.</p>
-                    <p><strong>Número do Pedido: <span id="numeroPedido">#12345</span></strong></p>
+                    <h4 class="mb-3">Obrigado pela sua compra!</h4>
+                    <p class="text-muted mb-3">Seu pedido foi recebido e está sendo processado.</p>
+                    <div class="alert alert-info">
+                        <strong>Número do Pedido: <span id="numeroPedido">#12345</span></strong>
+                    </div>
                     <p class="text-muted">Você receberá um e-mail com os detalhes do pedido em breve.</p>
                 </div>
                 <div class="modal-footer">
-                    <a href="/pedidos" class="btn btn-primary">Ver Meus Pedidos</a>
-                    <a href="/produtos" class="btn btn-outline-primary">Continuar Comprando</a>
+                    <a href="/pedidos" class="btn btn-primary">
+                        <i class="fas fa-list me-2"></i>
+                        Ver Meus Pedidos
+                    </a>
+                    <a href="/techcatalog" class="btn btn-outline-primary">
+                        <i class="fas fa-shopping-bag me-2"></i>
+                        Continuar Comprando
+                    </a>
                 </div>
             </div>
         </div>
@@ -351,221 +769,454 @@
     <div class="loading-overlay" id="loadingOverlay" style="display: none;">
         <div class="loading-spinner">
             <div class="spinner-border text-primary" role="status">
-                <span class="sr-only">Processando...</span>
+                <span class="visually-hidden">Carregando...</span>
             </div>
-            <p class="mt-3">Processando seu pedido...</p>
+            <p class="mt-3 text-muted">Processando seu pedido...</p>
         </div>
     </div>
 
     <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
     
     <script>
-        $(document).ready(function() {
-            // Máscaras para os campos
-            $('#telefone').mask('(00) 00000-0000');
-            $('#cep').mask('00000-000');
-            $('#numeroCartao').mask('0000 0000 0000 0000');
-            $('#mesVencimento').mask('00/00');
-            $('#cvv').mask('000');
-            
-            // Buscar endereço por CEP
-            $('#cep').blur(function() {
-                const cep = $(this).val().replace(/\D/g, '');
+        // Estado do formulário
+        let formData = {
+            delivery: {},
+            payment: {},
+            items: [
+                { name: 'Produto Exemplo 1', quantity: 2, price: 99.90 },
+                { name: 'Produto Exemplo 2', quantity: 1, price: 149.90 }
+            ]
+        };
+
+        // Inicialização quando o documento carrega
+        document.addEventListener('DOMContentLoaded', function() {
+            initializePage();
+            setupEventListeners();
+            setupMasks();
+        });
+
+        function initializePage() {
+            // Animação de entrada para os cards
+            const cards = document.querySelectorAll('.card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        }
+
+        function setupEventListeners() {
+            // CEP - buscar endereço automaticamente
+            document.getElementById('cep').addEventListener('blur', function() {
+                const cep = this.value.replace(/\D/g, '');
                 if (cep.length === 8) {
                     buscarEnderecoPorCEP(cep);
                 }
             });
-        });
-        
+
+            // Validação em tempo real
+            const requiredFields = ['nomeCompleto', 'telefone', 'cep', 'endereco', 'numero', 'bairro', 'cidade'];
+            requiredFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.addEventListener('blur', () => validateField(field));
+                    field.addEventListener('input', () => clearValidation(field));
+                }
+            });
+
+            // Validação de cartão em tempo real
+            const cardFields = ['numeroCartao', 'nomeCartao', 'mesVencimento', 'cvv'];
+            cardFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.addEventListener('blur', () => validateCardField(field));
+                    field.addEventListener('input', () => clearValidation(field));
+                }
+            });
+        }
+
+        function setupMasks() {
+            // Aplicar máscaras aos campos
+            if (typeof $ !== 'undefined') {
+                $('#telefone').mask('(00) 00000-0000');
+                $('#cep').mask('00000-000');
+                $('#numeroCartao').mask('0000 0000 0000 0000');
+                $('#mesVencimento').mask('00/00');
+                $('#cvv').mask('000');
+            }
+        }
+
         function selectPayment(tipo) {
             // Remover seleção anterior
-            $('.payment-method').removeClass('selected');
+            document.querySelectorAll('.payment-method').forEach(method => {
+                method.classList.remove('selected');
+            });
             
             // Selecionar novo método
-            $(`#${tipo}`).prop('checked', true);
-            $(`#${tipo}`).closest('.payment-method').addClass('selected');
+            const selectedMethod = document.querySelector(`#${tipo}`).closest('.payment-method');
+            selectedMethod.classList.add('selected');
+            document.getElementById(tipo).checked = true;
             
-            // Mostrar/ocultar detalhes do cartão
+            // Mostrar/ocultar detalhes do cartão com animação
+            const cartaoDetalhes = document.getElementById('cartaoDetalhes');
             if (tipo === 'cartao') {
-                $('#cartaoDetalhes').slideDown();
+                cartaoDetalhes.style.display = 'block';
+                cartaoDetalhes.style.opacity = '0';
+                cartaoDetalhes.style.transform = 'translateY(-10px)';
+                setTimeout(() => {
+                    cartaoDetalhes.style.transition = 'all 0.3s ease';
+                    cartaoDetalhes.style.opacity = '1';
+                    cartaoDetalhes.style.transform = 'translateY(0)';
+                }, 10);
             } else {
-                $('#cartaoDetalhes').slideUp();
+                cartaoDetalhes.style.transition = 'all 0.3s ease';
+                cartaoDetalhes.style.opacity = '0';
+                cartaoDetalhes.style.transform = 'translateY(-10px)';
+                setTimeout(() => {
+                    cartaoDetalhes.style.display = 'none';
+                }, 300);
             }
+
+            // Salvar no estado
+            formData.payment.method = tipo;
         }
-        
+
         function buscarEnderecoPorCEP(cep) {
-            $.ajax({
-                url: `https://viacep.com.br/ws/${cep}/json/`,
-                method: 'GET',
-                success: function(data) {
+            const cepField = document.getElementById('cep');
+            const enderecoField = document.getElementById('endereco');
+            const bairroField = document.getElementById('bairro');
+            const cidadeField = document.getElementById('cidade');
+
+            // Mostrar loading no campo CEP
+            cepField.style.background = 'linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%)';
+            cepField.style.backgroundSize = '200% 100%';
+            cepField.style.animation = 'loading 1.5s infinite';
+
+            fetch(`https://viacep.com.br/ws/${cep}/json/`)
+                .then(response => response.json())
+                .then(data => {
+                    // Remover animação de loading
+                    cepField.style.background = '';
+                    cepField.style.animation = '';
+
                     if (!data.erro) {
-                        $('#endereco').val(data.logradouro);
-                        $('#bairro').val(data.bairro);
-                        $('#cidade').val(data.localidade);
-                        $('#numero').focus();
+                        // Preencher campos com animação
+                        const fields = [
+                            { element: enderecoField, value: data.logradouro },
+                            { element: bairroField, value: data.bairro },
+                            { element: cidadeField, value: data.localidade }
+                        ];
+
+                        fields.forEach((field, index) => {
+                            setTimeout(() => {
+                                field.element.value = field.value;
+                                field.element.style.transform = 'scale(1.02)';
+                                field.element.style.borderColor = 'var(--success-color)';
+                                setTimeout(() => {
+                                    field.element.style.transform = 'scale(1)';
+                                    field.element.style.borderColor = '';
+                                }, 200);
+                            }, index * 100);
+                        });
+
+                        // Focar no próximo campo
+                        setTimeout(() => {
+                            document.getElementById('numero').focus();
+                        }, 400);
+
+                        showNotification('CEP encontrado com sucesso!', 'success');
                     } else {
-                        alert('CEP não encontrado');
+                        showNotification('CEP não encontrado', 'error');
+                        cepField.classList.add('is-invalid');
                     }
-                },
-                error: function() {
-                    alert('Erro ao buscar CEP');
-                }
-            });
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar CEP:', error);
+                    showNotification('Erro ao buscar CEP', 'error');
+                    cepField.style.background = '';
+                    cepField.style.animation = '';
+                    cepField.classList.add('is-invalid');
+                });
         }
-        
+
+        function validateField(field) {
+            const value = field.value.trim();
+            if (!value && field.required) {
+                field.classList.add('is-invalid');
+                field.classList.remove('is-valid');
+                return false;
+            } else if (value) {
+                field.classList.remove('is-invalid');
+                field.classList.add('is-valid');
+                return true;
+            }
+            return true;
+        }
+
+        function validateCardField(field) {
+            const value = field.value.trim();
+            let isValid = true;
+
+            switch (field.id) {
+                case 'numeroCartao':
+                    isValid = /^\d{4}\s\d{4}\s\d{4}\s\d{4}$/.test(value);
+                    break;
+                case 'nomeCartao':
+                    isValid = value.length >= 3;
+                    break;
+                case 'mesVencimento':
+                    isValid = /^\d{2}\/\d{2}$/.test(value);
+                    if (isValid) {
+                        const [mes, ano] = value.split('/');
+                        const anoCompleto = 2000 + parseInt(ano);
+                        const dataVencimento = new Date(anoCompleto, parseInt(mes) - 1);
+                        isValid = dataVencimento > new Date();
+                    }
+                    break;
+                case 'cvv':
+                    isValid = /^\d{3}$/.test(value);
+                    break;
+            }
+
+            if (!isValid) {
+                field.classList.add('is-invalid');
+                field.classList.remove('is-valid');
+            } else {
+                field.classList.remove('is-invalid');
+                field.classList.add('is-valid');
+            }
+
+            return isValid;
+        }
+
+        function clearValidation(field) {
+            field.classList.remove('is-invalid', 'is-valid');
+        }
+
         function validarFormulario() {
-            let valid = true;
+            let isValid = true;
+            const errors = [];
+
+            // Validar dados de entrega
             const requiredFields = [
-                'nomeCompleto', 'telefone', 'cep', 'endereco', 
-                'numero', 'bairro', 'cidade'
+                { id: 'nomeCompleto', name: 'Nome Completo' },
+                { id: 'telefone', name: 'Telefone' },
+                { id: 'cep', name: 'CEP' },
+                { id: 'endereco', name: 'Endereço' },
+                { id: 'numero', name: 'Número' },
+                { id: 'bairro', name: 'Bairro' },
+                { id: 'cidade', name: 'Cidade' }
             ];
-            
-            // Validar campos obrigatórios
+
             requiredFields.forEach(field => {
-                const value = $(`#${field}`).val().trim();
-                if (!value) {
-                    $(`#${field}`).addClass('is-invalid');
-                    valid = false;
-                } else {
-                    $(`#${field}`).removeClass('is-invalid');
+                const element = document.getElementById(field.id);
+                if (!validateField(element)) {
+                    isValid = false;
+                    errors.push(field.name);
                 }
             });
-            
+
             // Validar forma de pagamento
-            const formaPagamento = $('input[name="formaPagamento"]:checked').val();
+            const formaPagamento = document.querySelector('input[name="formaPagamento"]:checked');
             if (!formaPagamento) {
-                alert('Por favor, selecione uma forma de pagamento');
-                valid = false;
-            }
-            
-            // Validar dados do cartão se selecionado
-            if (formaPagamento === 'cartao') {
-                const cartaoFields = ['numeroCartao', 'nomeCartao', 'mesVencimento', 'cvv'];
-                cartaoFields.forEach(field => {
-                    const value = $(`#${field}`).val().trim();
-                    if (!value) {
-                        $(`#${field}`).addClass('is-invalid');
-                        valid = false;
-                    } else {
-                        $(`#${field}`).removeClass('is-invalid');
+                isValid = false;
+                errors.push('Forma de pagamento');
+            } else if (formaPagamento.value === 'cartao') {
+                // Validar dados do cartão
+                const cardFields = [
+                    { id: 'numeroCartao', name: 'Número do Cartão' },
+                    { id: 'nomeCartao', name: 'Nome no Cartão' },
+                    { id: 'mesVencimento', name: 'Validade' },
+                    { id: 'cvv', name: 'CVV' }
+                ];
+
+                cardFields.forEach(field => {
+                    const element = document.getElementById(field.id);
+                    if (!validateCardField(element)) {
+                        isValid = false;
+                        errors.push(field.name);
                     }
                 });
             }
-            
-            return valid;
+
+            if (!isValid) {
+                showNotification(`Por favor, corrija os seguintes campos: ${errors.join(', ')}`, 'error');
+            }
+
+            return isValid;
         }
-        
+
         function finalizarPedido() {
             if (!validarFormulario()) {
-                alert('Por favor, preencha todos os campos obrigatórios');
                 return;
             }
+
+            // Coletar dados do formulário
+            const dadosPedido = coletarDadosFormulario();
             
             // Mostrar loading
-            $('#loadingOverlay').show();
+            document.getElementById('loadingOverlay').style.display = 'flex';
             
-            // Simular processamento do pedido
-            setTimeout(function() {
-                $('#loadingOverlay').hide();
-                
-                // Gerar número do pedido aleatório
-                const numeroPedido = '#' + Math.floor(Math.random() * 100000);
-                $('#numeroPedido').text(numeroPedido);
-                
-                // Mostrar modal de confirmação
-                $('#confirmacaoModal').modal('show');
-                
-                // Em uma implementação real, você faria uma requisição AJAX para o backend
-                // processarPedidoNoBackend();
-                
-            }, 3000);
+            // Simular processamento
+            setTimeout(() => {
+                processarPedido(dadosPedido);
+            }, 2000);
         }
-        
-        // Função para processar pedido no backend (implementar conforme necessário)
-        function processarPedidoNoBackend() {
-            const dadosPedido = {
-                // Dados de entrega
-                nomeCompleto: $('#nomeCompleto').val(),
-                telefone: $('#telefone').val(),
-                cep: $('#cep').val(),
-                endereco: $('#endereco').val(),
-                numero: $('#numero').val(),
-                complemento: $('#complemento').val(),
-                bairro: $('#bairro').val(),
-                cidade: $('#cidade').val(),
-                
-                // Forma de pagamento
-                formaPagamento: $('input[name="formaPagamento"]:checked').val(),
-                
-                // Dados do cartão (se aplicável)
-                numeroCartao: $('#numeroCartao').val(),
-                nomeCartao: $('#nomeCartao').val(),
-                mesVencimento: $('#mesVencimento').val(),
-                cvv: $('#cvv').val(),
-                parcelas: $('#parcelas').val(),
-                
-                // Observações
-                observacoes: $('#observacoes').val()
-            };
+
+        function coletarDadosFormulario() {
+            const formaPagamento = document.querySelector('input[name="formaPagamento"]:checked').value;
             
-            $.ajax({
-                url: '/pedidos/finalizar',
-                method: 'POST',
-                data: dadosPedido,
-                success: function(response) {
-                    if (response.success) {
-                        $('#numeroPedido').text(response.numeroPedido);
-                        $('#confirmacaoModal').modal('show');
-                    } else {
-                        alert('Erro ao processar pedido: ' + response.message);
-                    }
+            const dados = {
+                entrega: {
+                    nomeCompleto: document.getElementById('nomeCompleto').value,
+                    telefone: document.getElementById('telefone').value,
+                    cep: document.getElementById('cep').value,
+                    endereco: document.getElementById('endereco').value,
+                    numero: document.getElementById('numero').value,
+                    complemento: document.getElementById('complemento').value,
+                    bairro: document.getElementById('bairro').value,
+                    cidade: document.getElementById('cidade').value
                 },
-                error: function() {
-                    alert('Erro ao processar pedido. Tente novamente.');
+                pagamento: {
+                    metodo: formaPagamento
                 },
-                complete: function() {
-                    $('#loadingOverlay').hide();
-                }
+                observacoes: document.getElementById('observacoes').value
+            };
+
+            if (formaPagamento === 'cartao') {
+                dados.pagamento.cartao = {
+                    numero: document.getElementById('numeroCartao').value,
+                    nome: document.getElementById('nomeCartao').value,
+                    validade: document.getElementById('mesVencimento').value,
+                    cvv: document.getElementById('cvv').value,
+                    parcelas: document.getElementById('parcelas').value
+                };
+            }
+
+            return dados;
+        }
+
+        function processarPedido(dados) {
+            // Simular sucesso
+            const numeroPedido = '#' + Math.floor(Math.random() * 100000).toString().padStart(5, '0');
+            
+            // Esconder loading
+            document.getElementById('loadingOverlay').style.display = 'none';
+            
+            // Atualizar número do pedido no modal
+            document.getElementById('numeroPedido').textContent = numeroPedido;
+            
+            // Mostrar modal de confirmação
+            const modal = new bootstrap.Modal(document.getElementById('confirmacaoModal'));
+            modal.show();
+
+            // Atualizar progress steps
+            updateProgressSteps();
+            
+            // Em uma implementação real, você faria uma requisição para o backend
+            // enviarPedidoParaBackend(dados);
+        }
+
+        function updateProgressSteps() {
+            // Atualizar steps para mostrar confirmação
+            const steps = document.querySelectorAll('.step');
+            const lines = document.querySelectorAll('.step-line');
+            
+            // Marcar pagamento como completo
+            steps[1].classList.remove('step-active');
+            steps[1].classList.add('step-completed');
+            steps[1].querySelector('i').className = 'fas fa-check';
+            
+            // Ativar confirmação
+            steps[2].classList.remove('step-inactive');
+            steps[2].classList.add('step-active');
+            
+            // Atualizar linha
+            lines[1].classList.remove('inactive');
+            lines[1].classList.add('completed');
+        }
+
+        function showNotification(message, type = 'info') {
+            // Criar notificação toast
+            const toastHtml = `
+                <div class="toast align-items-center text-white bg-${type === 'error' ? 'danger' : type === 'success' ? 'success' : 'primary'} border-0" role="alert">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <i class="fas fa-${type === 'error' ? 'exclamation-circle' : type === 'success' ? 'check-circle' : 'info-circle'} me-2"></i>
+                            ${message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            `;
+
+            // Adicionar ao container de toasts
+            let toastContainer = document.querySelector('.toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+                document.body.appendChild(toastContainer);
+            }
+
+            toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+            
+            // Inicializar e mostrar toast
+            const toastElement = toastContainer.lastElementChild;
+            const toast = new bootstrap.Toast(toastElement);
+            toast.show();
+
+            // Remover elemento após ocultar
+            toastElement.addEventListener('hidden.bs.toast', () => {
+                toastElement.remove();
             });
         }
-        
-        // Prevenir o modal de fechar clicando fora
-        $('#confirmacaoModal').modal({
-            backdrop: 'static',
-            keyboard: false
-        });
+
+        // Função para integração com backend (implementar conforme necessário)
+        function enviarPedidoParaBackend(dados) {
+            fetch('/api/pedidos/finalizar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify(dados)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('numeroPedido').textContent = data.numeroPedido;
+                    const modal = new bootstrap.Modal(document.getElementById('confirmacaoModal'));
+                    modal.show();
+                    updateProgressSteps();
+                } else {
+                    showNotification('Erro ao processar pedido: ' + data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                showNotification('Erro ao processar pedido. Tente novamente.', 'error');
+            })
+            .finally(() => {
+                document.getElementById('loadingOverlay').style.display = 'none';
+            });
+        }
+
+        // Estilo para animação de loading
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes loading {
+                0% { background-position: 200% 0; }
+                100% { background-position: -200% 0; }
+            }
+        `;
+        document.head.appendChild(style);
     </script>
-    
-    <style>
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.9);
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-        }
-        
-        .is-invalid {
-            border-color: #dc3545;
-        }
-        
-        .payment-method {
-            transition: all 0.3s ease;
-        }
-        
-        .payment-method:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-    </style>
 </body>
 </html>
