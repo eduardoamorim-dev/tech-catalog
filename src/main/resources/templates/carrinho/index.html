@@ -51,9 +51,15 @@
             transition: all 0.2s ease;
         }
         
-        .quantidade-btn:hover {
+        .quantidade-btn:hover:not(:disabled) {
             background-color: #e9ecef;
             border-color: #6c757d;
+        }
+        
+        .quantidade-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: #f8f9fa;
         }
         
         .quantidade-input {
@@ -150,10 +156,16 @@
             border-radius: 4px;
             margin-bottom: 20px;
         }
+        
+        .processing {
+            pointer-events: none;
+            opacity: 0.7;
+        }
     </style>
 </head>
 <body>
     <nav th:replace="fragments/navbar :: navbar('carrinho')"></nav>
+    
     <!-- Loading Overlay -->
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loading-spinner">
@@ -242,9 +254,11 @@
                             <!-- Controles de Quantidade -->
                             <div class="col-md-3">
                                 <label class="form-label small">Quantidade:</label>
-                                <div class="quantidade-controls">
-                                    <button class="quantidade-btn" 
-                                            th:onclick="'alterarQuantidade(' + ${item.idProduto} + ', ' + (${item.quantidade} - 1) + ')'">
+                                <div class="quantidade-controls" th:data-produto-id="${item.idProduto}" th:data-estoque="${item.produto.nivelEstoque}">
+                                    <button class="quantidade-btn btn-diminuir" 
+                                            type="button"
+                                            th:data-produto-id="${item.idProduto}"
+                                            th:data-quantidade-atual="${item.quantidade}">
                                         <i class="fas fa-minus"></i>
                                     </button>
                                     
@@ -252,12 +266,16 @@
                                            class="quantidade-input" 
                                            th:value="${item.quantidade}"
                                            th:id="'quantidade-' + ${item.idProduto}"
+                                           th:data-produto-id="${item.idProduto}"
+                                           th:data-estoque="${item.produto.nivelEstoque}"
                                            min="1" 
-                                           th:max="${item.produto.nivelEstoque}"
-                                           th:onchange="'alterarQuantidade(' + ${item.idProduto} + ', this.value)'">
+                                           th:max="${item.produto.nivelEstoque}">
                                     
-                                    <button class="quantidade-btn" 
-                                            th:onclick="'alterarQuantidade(' + ${item.idProduto} + ', ' + (${item.quantidade} + 1) + ')'">
+                                    <button class="quantidade-btn btn-aumentar" 
+                                            type="button"
+                                            th:data-produto-id="${item.idProduto}"
+                                            th:data-quantidade-atual="${item.quantidade}"
+                                            th:data-estoque="${item.produto.nivelEstoque}">
                                         <i class="fas fa-plus"></i>
                                     </button>
                                 </div>
@@ -276,7 +294,7 @@
                                     </strong>
                                 </div>
                                 <button class="btn btn-remover btn-sm" 
-                                        th:onclick="'removerItem(' + ${item.idProduto} + ')'">
+                                        th:data-produto-id="${item.idProduto}">
                                     <i class="fas fa-trash"></i> Remover
                                 </button>
                             </div>
@@ -313,10 +331,6 @@
                     </div>
                     
                     <div class="d-grid gap-2">
-                        <!-- <button class="btn btn-light btn-lg" onclick="verificarEstoque()">
-                            <i class="fas fa-check-circle"></i> Verificar Estoque
-                        </button> -->
-                        
                         <a href="/carrinho/checkout" class="btn btn-success btn-lg">
                             <i class="fas fa-credit-card"></i> Finalizar Compra
                         </a>
@@ -343,7 +357,9 @@
         class CarrinhoManager {
             constructor() {
                 this.csrfToken = this.getCsrfToken();
+                this.processando = new Set(); // Controla quais produtos estão sendo processados
                 this.initEventListeners();
+                this.atualizarEstadoBotoes();
                 console.log('🛒 CarrinhoManager inicializado');
             }
 
@@ -358,29 +374,87 @@
              * Inicializa os event listeners
              */
             initEventListeners() {
-                // Prevenir submit de formulários por enter
+                // Botões de aumentar quantidade
+                $(document).on('click', '.btn-aumentar', (e) => {
+                    e.preventDefault();
+                    const btn = $(e.target).closest('.btn-aumentar');
+                    const produtoId = btn.data('produto-id');
+                    const quantidadeAtual = parseInt($(`#quantidade-${produtoId}`).val()) || 0;
+                    const estoque = parseInt(btn.data('estoque')) || 0;
+                    
+                    console.log('➕ Tentando aumentar:', { produtoId, quantidadeAtual, estoque });
+                    
+                    if (quantidadeAtual >= estoque) {
+                        this.showToast('warning', `Estoque máximo atingido: ${estoque} unidades`);
+                        return;
+                    }
+                    
+                    this.alterarQuantidade(produtoId, quantidadeAtual + 1);
+                });
+
+                // Botões de diminuir quantidade
+                $(document).on('click', '.btn-diminuir', (e) => {
+                    e.preventDefault();
+                    const btn = $(e.target).closest('.btn-diminuir');
+                    const produtoId = btn.data('produto-id');
+                    const quantidadeAtual = parseInt($(`#quantidade-${produtoId}`).val()) || 0;
+                    
+                    console.log('➖ Tentando diminuir:', { produtoId, quantidadeAtual });
+                    
+                    if (quantidadeAtual <= 1) {
+                        this.showToast('warning', 'Quantidade mínima é 1. Use "Remover" para retirar o item.');
+                        return;
+                    }
+                    
+                    this.alterarQuantidade(produtoId, quantidadeAtual - 1);
+                });
+
+                // Input de quantidade - mudança direta
+                $(document).on('change', '.quantidade-input', (e) => {
+                    const input = $(e.target);
+                    const produtoId = input.data('produto-id');
+                    const novaQuantidade = parseInt(input.val()) || 1;
+                    const estoque = parseInt(input.data('estoque')) || 0;
+                    
+                    console.log('🔢 Mudança direta na quantidade:', { produtoId, novaQuantidade, estoque });
+                    
+                    // Validar limites
+                    if (novaQuantidade < 1) {
+                        input.val(1);
+                        this.showToast('warning', 'Quantidade mínima é 1');
+                        return;
+                    }
+                    
+                    if (novaQuantidade > estoque) {
+                        input.val(estoque);
+                        this.showToast('warning', `Estoque máximo: ${estoque} unidades`);
+                        this.alterarQuantidade(produtoId, estoque);
+                        return;
+                    }
+                    
+                    this.alterarQuantidade(produtoId, novaQuantidade);
+                });
+
+                // Prevenir submit por enter
                 $(document).on('keypress', '.quantidade-input', (e) => {
                     if (e.which === 13) {
                         e.preventDefault();
-                        const input = $(e.target);
-                        const produtoId = input.attr('id').replace('quantidade-', '');
-                        const quantidade = input.val();
-                        this.alterarQuantidade(produtoId, quantidade);
+                        $(e.target).blur(); // Dispara o evento change
                     }
                 });
 
-                // Validar entrada numérica
+                // Botões de remover
+                $(document).on('click', '.btn-remover', (e) => {
+                    e.preventDefault();
+                    const produtoId = $(e.target).closest('.btn-remover').data('produto-id');
+                    this.removerItem(produtoId);
+                });
+
+                // Validar entrada apenas numérica
                 $(document).on('input', '.quantidade-input', (e) => {
                     const input = $(e.target);
-                    let value = parseInt(input.val());
-                    const max = parseInt(input.attr('max'));
-                    
-                    if (isNaN(value) || value < 1) {
-                        input.val(1);
-                    } else if (value > max) {
-                        input.val(max);
-                        this.showToast('warning', `Quantidade máxima disponível: ${max}`);
-                    }
+                    let value = input.val().replace(/\D/g, ''); // Remove não-dígitos
+                    input.val(value);
                 });
             }
 
@@ -388,16 +462,24 @@
              * Altera a quantidade de um produto
              */
             alterarQuantidade(produtoId, novaQuantidade) {
-                console.log('🔄 Alterando quantidade:', { produtoId, novaQuantidade });
-                
-                novaQuantidade = parseInt(novaQuantidade);
-                
-                if (!produtoId || novaQuantidade < 1) {
-                    this.showToast('error', 'Quantidade deve ser pelo menos 1');
+                // Verificar se já está processando este produto
+                if (this.processando.has(produtoId)) {
+                    console.log('⏳ Produto já está sendo processado:', produtoId);
                     return;
                 }
 
-                this.showLoading(true);
+                novaQuantidade = parseInt(novaQuantidade);
+                
+                if (!produtoId || novaQuantidade < 1) {
+                    this.showToast('error', 'Dados inválidos');
+                    return;
+                }
+
+                console.log('🔄 Alterando quantidade:', { produtoId, novaQuantidade });
+                
+                // Marcar como processando
+                this.processando.add(produtoId);
+                this.setItemProcessing(produtoId, true);
 
                 const requestData = {
                     produtoId: produtoId,
@@ -412,7 +494,7 @@
                     url: '/carrinho/atualizar',
                     method: 'POST',
                     data: requestData,
-                    timeout: 10000,
+                    timeout: 15000,
                     beforeSend: (xhr) => {
                         if (this.csrfToken) {
                             xhr.setRequestHeader('X-CSRF-TOKEN', this.csrfToken);
@@ -426,26 +508,41 @@
                         // Atualizar o valor total do item
                         $(`#total-item-${produtoId}`).text('R$ ' + this.formatCurrency(response.valorTotalItem));
                         
-                        // Atualizar o input de quantidade
+                        // Garantir que o input está com o valor correto
                         $(`#quantidade-${produtoId}`).val(novaQuantidade);
+                        
+                        // Atualizar data attributes dos botões
+                        $(`.btn-aumentar[data-produto-id="${produtoId}"]`).attr('data-quantidade-atual', novaQuantidade);
+                        $(`.btn-diminuir[data-produto-id="${produtoId}"]`).attr('data-quantidade-atual', novaQuantidade);
                         
                         // Atualizar resumo do carrinho
                         if (response.carrinhoResumo) {
                             this.atualizarResumo(response.carrinhoResumo);
                         }
                         
-                        this.showToast('success', response.message);
+                        this.showToast('success', response.message || 'Quantidade atualizada');
                         this.animateItem(produtoId);
                     } else {
-                        this.showToast('error', response.message);
+                        // Em caso de erro, reverter o valor no input
+                        const quantidadeAtual = $(`.btn-aumentar[data-produto-id="${produtoId}"]`).attr('data-quantidade-atual');
+                        $(`#quantidade-${produtoId}`).val(quantidadeAtual);
+                        this.showToast('error', response.message || 'Erro ao atualizar quantidade');
                     }
                 })
                 .fail((xhr) => {
                     console.error('❌ Erro ao atualizar quantidade:', xhr);
+                    
+                    // Reverter o valor no input
+                    const quantidadeAtual = $(`.btn-aumentar[data-produto-id="${produtoId}"]`).attr('data-quantidade-atual');
+                    $(`#quantidade-${produtoId}`).val(quantidadeAtual);
+                    
                     this.handleAjaxError(xhr);
                 })
                 .always(() => {
-                    this.showLoading(false);
+                    // Remover do processamento
+                    this.processando.delete(produtoId);
+                    this.setItemProcessing(produtoId, false);
+                    this.atualizarEstadoBotoes();
                 });
             }
 
@@ -499,9 +596,9 @@
                             this.atualizarResumo(response.carrinhoResumo);
                         }
                         
-                        this.showToast('success', response.message);
+                        this.showToast('success', response.message || 'Item removido do carrinho');
                     } else {
-                        this.showToast('error', response.message);
+                        this.showToast('error', response.message || 'Erro ao remover item');
                     }
                 })
                 .fail((xhr) => {
@@ -526,37 +623,36 @@
             }
 
             /**
-             * Verifica o estoque dos itens
+             * Atualiza o estado dos botões baseado na quantidade e estoque
              */
-            verificarEstoque() {
-                console.log('🔍 Verificando estoque...');
-                this.showLoading(true);
-
-                $.ajax({
-                    url: '/carrinho/verificar-estoque',
-                    method: 'GET',
-                    timeout: 10000
-                })
-                .done((response) => {
-                    console.log('✅ Estoque verificado:', response);
+            atualizarEstadoBotoes() {
+                $('.quantidade-controls').each((index, element) => {
+                    const controls = $(element);
+                    const produtoId = controls.data('produto-id');
+                    const estoque = parseInt(controls.data('estoque')) || 0;
+                    const quantidadeAtual = parseInt($(`#quantidade-${produtoId}`).val()) || 0;
                     
-                    if (response.carrinhoValido) {
-                        this.showToast('success', 'Todos os itens possuem estoque suficiente!');
-                    } else {
-                        let mensagem = 'Alguns itens possuem estoque insuficiente:';
-                        response.itensComProblema.forEach(item => {
-                            mensagem += `\n• ${item.produto.titulo}: solicitado ${item.quantidade}, disponível ${item.produto.nivelEstoque}`;
-                        });
-                        this.showToast('warning', mensagem);
-                    }
-                })
-                .fail((xhr) => {
-                    console.error('❌ Erro ao verificar estoque:', xhr);
-                    this.handleAjaxError(xhr);
-                })
-                .always(() => {
-                    this.showLoading(false);
+                    const btnDiminuir = controls.find('.btn-diminuir');
+                    const btnAumentar = controls.find('.btn-aumentar');
+                    
+                    // Botão diminuir - desabilitar se quantidade for 1 ou se estiver processando
+                    btnDiminuir.prop('disabled', quantidadeAtual <= 1 || this.processando.has(produtoId));
+                    
+                    // Botão aumentar - desabilitar se atingiu o estoque ou se estiver processando
+                    btnAumentar.prop('disabled', quantidadeAtual >= estoque || this.processando.has(produtoId));
                 });
+            }
+
+            /**
+             * Define se um item está sendo processado
+             */
+            setItemProcessing(produtoId, processing) {
+                const item = $(`#item-${produtoId}`);
+                if (processing) {
+                    item.addClass('processing');
+                } else {
+                    item.removeClass('processing');
+                }
             }
 
             /**
@@ -653,6 +749,10 @@
                     }, 2000);
                 } else if (xhr.responseJSON && xhr.responseJSON.message) {
                     message = xhr.responseJSON.message;
+                } else if (xhr.status === 0) {
+                    message = 'Erro de conexão. Verifique sua internet.';
+                } else if (xhr.status >= 500) {
+                    message = 'Erro interno do servidor. Tente novamente.';
                 }
                 
                 this.showToast('error', message);
@@ -672,7 +772,7 @@
             window.carrinhoManager = new CarrinhoManager();
         });
 
-        // Funções globais para compatibilidade com Thymeleaf
+        // Funções globais para compatibilidade com Thymeleaf (mantidas para retrocompatibilidade)
         function alterarQuantidade(produtoId, quantidade) {
             if (window.carrinhoManager) {
                 window.carrinhoManager.alterarQuantidade(produtoId, quantidade);
