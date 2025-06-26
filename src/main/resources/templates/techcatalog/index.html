@@ -132,10 +132,8 @@
               <button
                 sec:authorize="hasAuthority('user')"
                 type="button"
-                class="btn btn-primary btn-add-cart"
-                th:data-product-id="${produto.id}"
-                th:data-product-title="${produto.titulo}"
-                th:data-product-price="${produto.valorBase}"
+                class="btn btn-primary btn-add-carrinho"
+                th:data-produto-id="${produto.id}"
                 th:disabled="${produto.nivelEstoque <= 0}"
               >
                 <i class="fas fa-shopping-cart mr-1"></i>
@@ -226,7 +224,7 @@
           </div>
           <div class="modal-body text-center">
             <i class="fas fa-shopping-cart fa-3x text-success mb-3"></i>
-            <h6 id="cartProductName"></h6>
+            <h6 id="cartProductName">Produto</h6>
             <p>foi adicionado ao seu carrinho com sucesso!</p>
           </div>
           <div class="modal-footer">
@@ -237,7 +235,7 @@
             >
               Continuar Comprando
             </button>
-            <a href="#" class="btn btn-success">
+            <a href="/carrinho" class="btn btn-success">
               <i class="fas fa-shopping-cart mr-1"></i>Ver Carrinho
             </a>
           </div>
@@ -379,10 +377,8 @@
                   <button
                     sec:authorize="hasAuthority('user')"
                     type="button"
-                    class="btn btn-success btn-lg btn-add-cart"
-                    th:data-product-id="${produto.id}"
-                    th:data-product-title="${produto.titulo}"
-                    th:data-product-price="${produto.valorBase}"
+                    class="btn btn-success btn-lg btn-add-carrinho"
+                    th:data-produto-id="${produto.id}"
                     th:disabled="${produto.nivelEstoque <= 0}"
                   >
                     <i class="fas fa-shopping-cart mr-2"></i>
@@ -421,7 +417,11 @@
             <!-- Especificações Técnicas -->
             <div class="row mt-4">
               <div class="col-12">
-                <ul class="nav nav-tabs" th:id="${'productTabs-' + produto.id}" role="tablist">
+                <ul
+                  class="nav nav-tabs"
+                  th:id="${'productTabs-' + produto.id}"
+                  role="tablist"
+                >
                   <li class="nav-item" role="presentation">
                     <a
                       class="nav-link active"
@@ -453,7 +453,10 @@
                     </a>
                   </li>
                 </ul>
-                <div class="tab-content" th:id="${'productTabsContent-' + produto.id}">
+                <div
+                  class="tab-content"
+                  th:id="${'productTabsContent-' + produto.id}"
+                >
                   <div
                     class="tab-pane fade show active"
                     th:id="${'specs-' + produto.id}"
@@ -498,37 +501,6 @@
     <script>
       // Funcionalidade do carrinho
       document.addEventListener("DOMContentLoaded", function () {
-        const addToCartButtons = document.querySelectorAll(".btn-add-cart");
-
-        addToCartButtons.forEach((button) => {
-          button.addEventListener("click", function () {
-            const productId = this.dataset.productId;
-            const productTitle = this.dataset.productTitle;
-            const productPrice = this.dataset.productPrice;
-
-            // Aqui você pode implementar a lógica para adicionar ao carrinho
-            // Por exemplo, fazer uma requisição AJAX para o servidor
-
-            // Mostrar modal de confirmação
-            document.getElementById("cartProductName").textContent =
-              productTitle;
-            $("#cartModal").modal("show");
-
-            // Animação do botão
-            this.innerHTML = '<i class="fas fa-check mr-1"></i>Adicionado!';
-            this.classList.remove("btn-primary", "btn-success");
-            this.classList.add("btn-success");
-
-            setTimeout(() => {
-              this.innerHTML =
-                '<i class="fas fa-shopping-cart mr-1"></i>Adicionar ao Carrinho';
-              this.classList.remove("btn-success");
-              this.classList.add("btn-primary");
-            }, 2000);
-          });
-        });
-
-        // Funcionalidade de busca
         const searchInput = document.getElementById("searchInput");
         const categoryFilter = document.getElementById("categoryFilter");
 
@@ -562,6 +534,429 @@
         searchInput.addEventListener("input", filterProducts);
         categoryFilter.addEventListener("change", filterProducts);
       });
+
+    
+
+    /**
+     * Utilitários JavaScript para funcionalidades do carrinho - COM SUPORTE A CSRF
+     */
+
+    class CarrinhoUtils {
+        constructor() {
+            this.csrfToken = this.getCsrfToken();
+            this.initEventListeners();
+            this.updateNavbarCarrinho();
+            this.testConnection();
+        }
+
+        /**
+         * Obtém o token CSRF da página
+         */
+        getCsrfToken() {
+            let token = $('meta[name="_csrf"]').attr('content');
+            if (!token) {
+                token = $('input[name="_csrf"]').val();
+            }
+            console.log('🔒 CSRF Token:', token ? 'encontrado' : 'não encontrado');
+            return token;
+        }
+
+        /**
+         * Testa a conexão com o backend
+         */
+        testConnection() {
+            console.log('🔄 Testando conexão com o backend...');
+            
+            // Teste GET
+            $.ajax({
+                url: '/carrinho/test',
+                method: 'GET',
+                timeout: 5000,
+                success: (response) => {
+                    console.log('✅ Teste GET funcionou:', response);
+                },
+                error: (xhr, status, error) => {
+                    console.error('❌ Erro no teste GET:', {
+                        status: xhr.status,
+                        statusText: xhr.statusText,
+                        error: error,
+                        responseText: xhr.responseText
+                    });
+                }
+            });
+
+            // Teste POST com CSRF
+            const postData = { param: 'teste' };
+            if (this.csrfToken) {
+                postData._csrf = this.csrfToken;
+            }
+
+            $.ajax({
+                url: '/carrinho/test-post',
+                method: 'POST',
+                data: postData,
+                timeout: 5000,
+                beforeSend: (xhr) => {
+                    if (this.csrfToken) {
+                        xhr.setRequestHeader('X-CSRF-TOKEN', this.csrfToken);
+                    }
+                },
+                success: (response) => {
+                    console.log('✅ Teste POST funcionou:', response);
+                },
+                error: (xhr, status, error) => {
+                    console.error('❌ Erro no teste POST:', {
+                        status: xhr.status,
+                        statusText: xhr.statusText,
+                        error: error,
+                        responseText: xhr.responseText
+                    });
+                }
+            });
+        }
+
+        /**
+         * Inicializa os event listeners
+         */
+        initEventListeners() {
+            // Event listener para botões de adicionar ao carrinho
+            $(document).on('click', '.btn-add-carrinho', (e) => {
+                e.preventDefault();
+                const button = $(e.currentTarget);
+                const produtoId = button.data('produto-id');
+                const quantidade = button.data('quantidade') || 1;
+
+                console.log('🛒 Clique no botão adicionar carrinho:', { produtoId, quantidade });
+                this.adicionarProduto(produtoId, quantidade, button);
+            });
+
+            // Event listener para formulários de adicionar ao carrinho
+            $(document).on('submit', '.form-add-carrinho', (e) => {
+                e.preventDefault();
+                const form = $(e.currentTarget);
+                const produtoId = form.find('input[name="produtoId"]').val();
+                const quantidade = form.find('input[name="quantidade"]').val() || 1;
+
+                console.log('📝 Submit do formulário carrinho:', { produtoId, quantidade });
+                this.adicionarProduto(produtoId, quantidade);
+            });
+
+            // Atualizar contador do carrinho periodicamente
+            setInterval(() => {
+                this.updateNavbarCarrinho();
+            }, 30000); // A cada 30 segundos
+        }
+
+        /**
+         * Adiciona produto ao carrinho com CSRF
+         */
+        adicionarProduto(produtoId, quantidade = 1, button = null) {
+            console.log('🚀 Iniciando adição de produto:', {
+                produtoId: produtoId,
+                quantidade: quantidade,
+                tipo: typeof produtoId,
+                button: button ? 'presente' : 'ausente'
+            });
+
+            // Validação básica
+            if (!produtoId || produtoId === '' || produtoId === 'undefined') {
+                console.error('❌ ID do produto inválido:', produtoId);
+                this.showNotification('error', 'Erro: ID do produto não encontrado');
+                return;
+            }
+
+            // Mostrar loading no botão se fornecido
+            if (button) {
+                const originalText = button.html();
+                button.prop('disabled', true)
+                      .html('<i class="fas fa-spinner fa-spin"></i> Adicionando...');
+
+                // Restaurar botão após operação
+                setTimeout(() => {
+                    button.prop('disabled', false).html(originalText);
+                }, 3000);
+            }
+
+            // Preparar dados com CSRF
+            const requestData = {
+                produtoId: parseInt(produtoId),
+                quantidade: parseInt(quantidade)
+            };
+
+            if (this.csrfToken) {
+                requestData._csrf = this.csrfToken;
+            }
+
+            console.log('📤 Enviando dados:', requestData);
+
+            // Tentar múltiplas abordagens
+            this.tryAddToCart(requestData, 0);
+        }
+
+        /**
+         * Tenta adicionar ao carrinho com diferentes métodos
+         */
+        tryAddToCart(requestData, attempt = 0) {
+            const methods = [
+                // Método 1: Form data tradicional
+                {
+                    name: 'Form Data',
+                    config: {
+                        url: '/carrinho/adicionar',
+                        method: 'POST',
+                        data: requestData,
+                        dataType: 'json',
+                        timeout: 10000,
+                        beforeSend: (xhr) => {
+                            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                            if (this.csrfToken) {
+                                xhr.setRequestHeader('X-CSRF-TOKEN', this.csrfToken);
+                            }
+                        }
+                    }
+                },
+                // Método 2: JSON
+                {
+                    name: 'JSON',
+                    config: {
+                        url: '/carrinho/adicionar-json',
+                        method: 'POST',
+                        data: JSON.stringify({
+                            produtoId: requestData.produtoId,
+                            quantidade: requestData.quantidade
+                        }),
+                        contentType: 'application/json',
+                        dataType: 'json',
+                        timeout: 10000,
+                        beforeSend: (xhr) => {
+                            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                            if (this.csrfToken) {
+                                xhr.setRequestHeader('X-CSRF-TOKEN', this.csrfToken);
+                            }
+                        }
+                    }
+                },
+                // Método 3: FormData
+                {
+                    name: 'FormData',
+                    config: {
+                        url: '/carrinho/adicionar',
+                        method: 'POST',
+                        data: $.param(requestData),
+                        contentType: 'application/x-www-form-urlencoded',
+                        dataType: 'json',
+                        timeout: 10000,
+                        beforeSend: (xhr) => {
+                            if (this.csrfToken) {
+                                xhr.setRequestHeader('X-CSRF-TOKEN', this.csrfToken);
+                            }
+                        }
+                    }
+                }
+            ];
+
+            if (attempt >= methods.length) {
+                console.error('❌ Todas as tentativas falharam');
+                this.showNotification('error', 'Erro: Não foi possível adicionar o produto ao carrinho');
+                return;
+            }
+
+            const method = methods[attempt];
+            console.log(`🔄 Tentativa ${attempt + 1}: ${method.name}`);
+
+            $.ajax(method.config)
+                .done((response) => {
+                    console.log(`✅ Sucesso com ${method.name}:`, response);
+                    
+                    if (response.success) {
+                        this.showNotification('success', response.message);
+                        this.updateNavbarCarrinho(response.carrinhoResumo);
+                        this.animateCarrinhoIcon();
+                    } else {
+                        this.showNotification('error', response.message);
+                    }
+                })
+                .fail((xhr, status, error) => {
+                    console.error(`❌ Falha com ${method.name}:`, {
+                        status: xhr.status,
+                        statusText: xhr.statusText,
+                        error: error,
+                        responseText: xhr.responseText,
+                        headers: xhr.getAllResponseHeaders()
+                    });
+
+                    if (xhr.status === 401) {
+                        this.showNotification('warning', 'Você precisa estar logado para adicionar produtos ao carrinho');
+                        setTimeout(() => {
+                            window.location.href = '/login';
+                        }, 2000);
+                        return;
+                    }
+
+                    if (xhr.status === 403) {
+                        this.showNotification('error', 'Erro de permissão. Tente recarregar a página.');
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 2000);
+                        return;
+                    }
+
+                    if (xhr.status === 405) {
+                        console.log(`⚠️ Método não permitido com ${method.name}, tentando próximo...`);
+                        this.tryAddToCart(requestData, attempt + 1);
+                        return;
+                    }
+
+                    // Se não foi erro 405, tentar próximo método
+                    if (attempt < methods.length - 1) {
+                        console.log(`⚠️ Tentando próximo método após falha...`);
+                        this.tryAddToCart(requestData, attempt + 1);
+                    } else {
+                        const response = xhr.responseJSON;
+                        this.showNotification('error', 
+                            response ? response.message : 'Erro ao adicionar produto ao carrinho');
+                    }
+                });
+        }
+
+        /**
+         * Atualiza o contador do carrinho na navbar
+         */
+        updateNavbarCarrinho(resumo = null) {
+            if (resumo) {
+                this.updateCarrinhoDisplay(resumo);
+            } else {
+                // Buscar resumo atual
+                $.ajax({
+                    url: '/carrinho/resumo',
+                    method: 'GET',
+                    timeout: 5000,
+                    success: (resumo) => {
+                        this.updateCarrinhoDisplay(resumo);
+                    },
+                    error: (xhr) => {
+                        if (xhr.status !== 401) {
+                            console.warn('Erro ao buscar resumo do carrinho:', xhr.status);
+                        }
+                    }
+                });
+            }
+        }
+
+        /**
+         * Atualiza a exibição do carrinho na navbar
+         */
+        updateCarrinhoDisplay(resumo) {
+            const carrinhoIcon = $('#carrinho-icon');
+            const carrinhoCount = $('#carrinho-count');
+            const carrinhoTotal = $('#carrinho-total');
+
+            console.log('🔄 Atualizando display do carrinho:', resumo);
+
+            if (resumo.totalItens > 0) {
+                carrinhoCount.text(resumo.totalItens).show();
+                if (carrinhoTotal.length) {
+                    carrinhoTotal.text('R$ ' + this.formatCurrency(resumo.total));
+                }
+            } else {
+                carrinhoCount.hide();
+                if (carrinhoTotal.length) {
+                    carrinhoTotal.text('R$ 0,00');
+                }
+            }
+        }
+
+        /**
+         * Anima o ícone do carrinho quando um produto é adicionado
+         */
+        animateCarrinhoIcon() {
+            const carrinhoIcon = $('#carrinho-icon');
+            carrinhoIcon.addClass('animate__animated animate__bounce');
+
+            setTimeout(() => {
+                carrinhoIcon.removeClass('animate__animated animate__bounce');
+            }, 1000);
+        }
+
+        /**
+         * Exibe notificações toast
+         */
+        showNotification(type, message) {
+            console.log(`📢 Notificação ${type}:`, message);
+            
+            const toastTypes = {
+                success: { icon: 'check-circle', class: 'bg-success' },
+                error: { icon: 'exclamation-circle', class: 'bg-danger' },
+                warning: { icon: 'exclamation-triangle', class: 'bg-warning' },
+                info: { icon: 'info-circle', class: 'bg-info' }
+            };
+
+            const toast = toastTypes[type] || toastTypes.info;
+
+            // Remover toast anterior se existir
+            $('.custom-toast').remove();
+
+            const toastHtml = `
+                <div class="custom-toast position-fixed" style="top: 20px; right: 20px; z-index: 9999; max-width: 350px;">
+                    <div class="toast show ${toast.class} text-white">
+                        <div class="toast-body d-flex align-items-center">
+                            <i class="fas fa-${toast.icon} mr-2"></i>
+                            <span class="flex-grow-1">${message}</span>
+                            <button type="button" class="ml-2 mb-1 close text-white" onclick="$(this).closest('.custom-toast').remove()">
+                                <span>&times;</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            $('body').append(toastHtml);
+
+            // Auto-remover após 5 segundos
+            setTimeout(() => {
+                $('.custom-toast').fadeOut(() => {
+                    $('.custom-toast').remove();
+                });
+            }, 5000);
+        }
+
+        /**
+         * Formata valor monetário
+         */
+        formatCurrency(value) {
+            return parseFloat(value).toFixed(2).replace('.', ',');
+        }
+
+        /**
+         * Debug info
+         */
+        getDebugInfo() {
+            return {
+                jquery: typeof $ !== 'undefined' ? $.fn.jquery : 'não carregado',
+                url: window.location.href,
+                csrf: this.csrfToken ? 'presente' : 'ausente',
+                userAgent: navigator.userAgent
+            };
+        }
+    }
+
+    // Inicializar quando o documento estiver pronto
+    $(document).ready(() => {
+        console.log('🚀 Inicializando CarrinhoUtils...');
+        const utils = new CarrinhoUtils();
+        console.log('Debug info:', utils.getDebugInfo());
+        window.carrinhoUtils = utils;
+    });
+
+    // Funções globais para compatibilidade
+    function adicionarAoCarrinho(produtoId, quantidade = 1, button = null) {
+        console.log('🔄 Função global adicionarAoCarrinho chamada:', { produtoId, quantidade });
+        if (window.carrinhoUtils) {
+            window.carrinhoUtils.adicionarProduto(produtoId, quantidade, button);
+        } else {
+            console.error('❌ CarrinhoUtils não inicializado');
+        }
+    }
     </script>
   </body>
 </html>

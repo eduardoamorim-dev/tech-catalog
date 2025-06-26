@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head('Finalizar Compra')">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finalizar Compra</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .checkout-step {
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+        }
+        .step-active {
+            background-color: #007bff;
+            color: white;
+        }
+        .step-completed {
+            background-color: #28a745;
+            color: white;
+        }
+        .step-inactive {
+            background-color: #e9ecef;
+            color: #6c757d;
+        }
+        .order-item {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+        .payment-method {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .payment-method:hover {
+            border-color: #007bff;
+        }
+        .payment-method.selected {
+            border-color: #007bff;
+            background-color: #f0f8ff;
+        }
+        .summary-card {
+            position: sticky;
+            top: 100px;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <!-- Navbar -->
+    <nav th:replace="fragments/navbar :: navbar('')"></nav>
+    
+    <div class="container mt-4 mb-5">
+        <!-- Progress Steps -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-center">
+                    <div class="d-flex align-items-center">
+                        <div class="text-center">
+                            <div class="checkout-step step-completed">
+                                <i class="fas fa-shopping-cart"></i>
+                            </div>
+                            <small class="text-muted">Carrinho</small>
+                        </div>
+                        <div class="mx-3" style="width: 50px; height: 2px; background-color: #28a745;"></div>
+                        <div class="text-center">
+                            <div class="checkout-step step-active">
+                                <i class="fas fa-credit-card"></i>
+                            </div>
+                            <small class="text-primary">Pagamento</small>
+                        </div>
+                        <div class="mx-3" style="width: 50px; height: 2px; background-color: #e9ecef;"></div>
+                        <div class="text-center">
+                            <div class="checkout-step step-inactive">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <small class="text-muted">Confirmação</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Formulário de Checkout -->
+            <div class="col-lg-8">
+                <form id="checkoutForm">
+                    <!-- Dados de Entrega -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-map-marker-alt mr-2"></i>Dados de Entrega</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="nomeCompleto">Nome Completo *</label>
+                                        <input type="text" class="form-control" id="nomeCompleto" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="telefone">Telefone *</label>
+                                        <input type="tel" class="form-control" id="telefone" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="cep">CEP *</label>
+                                        <input type="text" class="form-control" id="cep" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-7">
+                                    <div class="form-group">
+                                        <label for="endereco">Endereço *</label>
+                                        <input type="text" class="form-control" id="endereco" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="numero">Número *</label>
+                                        <input type="text" class="form-control" id="numero" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="complemento">Complemento</label>
+                                        <input type="text" class="form-control" id="complemento">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="bairro">Bairro *</label>
+                                        <input type="text" class="form-control" id="bairro" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="cidade">Cidade *</label>
+                                        <input type="text" class="form-control" id="cidade" required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Forma de Pagamento -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-credit-card mr-2"></i>Forma de Pagamento</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="payment-method" onclick="selectPayment('cartao')">
+                                        <div class="d-flex align-items-center">
+                                            <input type="radio" name="formaPagamento" value="cartao" id="cartao" class="mr-3">
+                                            <div>
+                                                <i class="fas fa-credit-card fa-2x text-primary mr-3"></i>
+                                                <strong>Cartão de Crédito</strong>
+                                                <br>
+                                                <small class="text-muted">Visa, Mastercard, Elo</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="payment-method" onclick="selectPayment('pix')">
+                                        <div class="d-flex align-items-center">
+                                            <input type="radio" name="formaPagamento" value="pix" id="pix" class="mr-3">
+                                            <div>
+                                                <i class="fas fa-qrcode fa-2x text-success mr-3"></i>
+                                                <strong>PIX</strong>
+                                                <br>
+                                                <small class="text-muted">Pagamento instantâneo</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Detalhes do Cartão (aparece apenas se cartão for selecionado) -->
+                            <div id="cartaoDetalhes" style="display: none;">
+                                <hr>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="numeroCartao">Número do Cartão *</label>
+                                            <input type="text" class="form-control" id="numeroCartao" placeholder="1234 5678 9012 3456">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="nomeCartao">Nome no Cartão *</label>
+                                            <input type="text" class="form-control" id="nomeCartao">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="mesVencimento">Mês/Ano *</label>
+                                            <input type="text" class="form-control" id="mesVencimento" placeholder="MM/AA">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="cvv">CVV *</label>
+                                            <input type="text" class="form-control" id="cvv" placeholder="123">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="parcelas">Parcelas *</label>
+                                            <select class="form-control" id="parcelas">
+                                                <option value="1">1x sem juros</option>
+                                                <option value="2">2x sem juros</option>
+                                                <option value="3">3x sem juros</option>
+                                                <option value="4">4x sem juros</option>
+                                                <option value="5">5x sem juros</option>
+                                                <option value="6">6x sem juros</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Observações -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-comment mr-2"></i>Observações</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <textarea class="form-control" id="observacoes" rows="3" placeholder="Observações sobre a entrega (opcional)"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Resumo do Pedido -->
+            <div class="col-lg-4">
+                <div class="card summary-card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Resumo do Pedido</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Itens do Pedido -->
+                        <div class="mb-3">
+                            <h6>Itens do Pedido</h6>
+                            <div th:each="item : ${itensCarrinho}" class="order-item">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1" th:text="${item.produto.nome}"></h6>
+                                        <small class="text-muted">
+                                            Qtd: <span th:text="${item.quantidade}"></span> x 
+                                            R$ <span th:text="${#numbers.formatDecimal(item.produto.preco, 1, 2)}"></span>
+                                        </small>
+                                    </div>
+                                    <div class="text-right">
+                                        <strong>R$ <span th:text="${#numbers.formatDecimal(item.valorTotal, 1, 2)}"></span></strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Resumo Financeiro -->
+                        <hr>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Subtotal:</span>
+                            <span>R$ <span th:text="${#numbers.formatDecimal(resumoCarrinho.subtotal, 1, 2)}"></span></span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Frete:</span>
+                            <span class="text-success">Grátis</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Desconto:</span>
+                            <span class="text-success">R$ 0,00</span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between mb-3">
+                            <strong>Total:</strong>
+                            <strong class="text-success h5">R$ <span th:text="${#numbers.formatDecimal(resumoCarrinho.total, 1, 2)}"></span></strong>
+                        </div>
+
+                        <!-- Botões de Ação -->
+                        <button type="button" class="btn btn-success btn-block btn-lg mb-3" onclick="finalizarPedido()">
+                            <i class="fas fa-check mr-2"></i>Confirmar Pedido
+                        </button>
+                        
+                        <a href="/carrinho" class="btn btn-outline-secondary btn-block">
+                            <i class="fas fa-arrow-left mr-2"></i>Voltar ao Carrinho
+                        </a>
+
+                        <!-- Selo de Segurança -->
+                        <div class="text-center mt-3">
+                            <small class="text-muted">
+                                <i class="fas fa-lock mr-1"></i>
+                                Compra 100% segura e protegida
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação -->
+    <div class="modal fade" id="confirmacaoModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-check-circle mr-2"></i>Pedido Confirmado!
+                    </h5>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                    </div>
+                    <h4>Obrigado pela sua compra!</h4>
+                    <p class="text-muted">Seu pedido foi recebido e está sendo processado.</p>
+                    <p><strong>Número do Pedido: <span id="numeroPedido">#12345</span></strong></p>
+                    <p class="text-muted">Você receberá um e-mail com os detalhes do pedido em breve.</p>
+                </div>
+                <div class="modal-footer">
+                    <a href="/pedidos" class="btn btn-primary">Ver Meus Pedidos</a>
+                    <a href="/produtos" class="btn btn-outline-primary">Continuar Comprando</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+        <div class="loading-spinner">
+            <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Processando...</span>
+            </div>
+            <p class="mt-3">Processando seu pedido...</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            // Máscaras para os campos
+            $('#telefone').mask('(00) 00000-0000');
+            $('#cep').mask('00000-000');
+            $('#numeroCartao').mask('0000 0000 0000 0000');
+            $('#mesVencimento').mask('00/00');
+            $('#cvv').mask('000');
+            
+            // Buscar endereço por CEP
+            $('#cep').blur(function() {
+                const cep = $(this).val().replace(/\D/g, '');
+                if (cep.length === 8) {
+                    buscarEnderecoPorCEP(cep);
+                }
+            });
+        });
+        
+        function selectPayment(tipo) {
+            // Remover seleção anterior
+            $('.payment-method').removeClass('selected');
+            
+            // Selecionar novo método
+            $(`#${tipo}`).prop('checked', true);
+            $(`#${tipo}`).closest('.payment-method').addClass('selected');
+            
+            // Mostrar/ocultar detalhes do cartão
+            if (tipo === 'cartao') {
+                $('#cartaoDetalhes').slideDown();
+            } else {
+                $('#cartaoDetalhes').slideUp();
+            }
+        }
+        
+        function buscarEnderecoPorCEP(cep) {
+            $.ajax({
+                url: `https://viacep.com.br/ws/${cep}/json/`,
+                method: 'GET',
+                success: function(data) {
+                    if (!data.erro) {
+                        $('#endereco').val(data.logradouro);
+                        $('#bairro').val(data.bairro);
+                        $('#cidade').val(data.localidade);
+                        $('#numero').focus();
+                    } else {
+                        alert('CEP não encontrado');
+                    }
+                },
+                error: function() {
+                    alert('Erro ao buscar CEP');
+                }
+            });
+        }
+        
+        function validarFormulario() {
+            let valid = true;
+            const requiredFields = [
+                'nomeCompleto', 'telefone', 'cep', 'endereco', 
+                'numero', 'bairro', 'cidade'
+            ];
+            
+            // Validar campos obrigatórios
+            requiredFields.forEach(field => {
+                const value = $(`#${field}`).val().trim();
+                if (!value) {
+                    $(`#${field}`).addClass('is-invalid');
+                    valid = false;
+                } else {
+                    $(`#${field}`).removeClass('is-invalid');
+                }
+            });
+            
+            // Validar forma de pagamento
+            const formaPagamento = $('input[name="formaPagamento"]:checked').val();
+            if (!formaPagamento) {
+                alert('Por favor, selecione uma forma de pagamento');
+                valid = false;
+            }
+            
+            // Validar dados do cartão se selecionado
+            if (formaPagamento === 'cartao') {
+                const cartaoFields = ['numeroCartao', 'nomeCartao', 'mesVencimento', 'cvv'];
+                cartaoFields.forEach(field => {
+                    const value = $(`#${field}`).val().trim();
+                    if (!value) {
+                        $(`#${field}`).addClass('is-invalid');
+                        valid = false;
+                    } else {
+                        $(`#${field}`).removeClass('is-invalid');
+                    }
+                });
+            }
+            
+            return valid;
+        }
+        
+        function finalizarPedido() {
+            if (!validarFormulario()) {
+                alert('Por favor, preencha todos os campos obrigatórios');
+                return;
+            }
+            
+            // Mostrar loading
+            $('#loadingOverlay').show();
+            
+            // Simular processamento do pedido
+            setTimeout(function() {
+                $('#loadingOverlay').hide();
+                
+                // Gerar número do pedido aleatório
+                const numeroPedido = '#' + Math.floor(Math.random() * 100000);
+                $('#numeroPedido').text(numeroPedido);
+                
+                // Mostrar modal de confirmação
+                $('#confirmacaoModal').modal('show');
+                
+                // Em uma implementação real, você faria uma requisição AJAX para o backend
+                // processarPedidoNoBackend();
+                
+            }, 3000);
+        }
+        
+        // Função para processar pedido no backend (implementar conforme necessário)
+        function processarPedidoNoBackend() {
+            const dadosPedido = {
+                // Dados de entrega
+                nomeCompleto: $('#nomeCompleto').val(),
+                telefone: $('#telefone').val(),
+                cep: $('#cep').val(),
+                endereco: $('#endereco').val(),
+                numero: $('#numero').val(),
+                complemento: $('#complemento').val(),
+                bairro: $('#bairro').val(),
+                cidade: $('#cidade').val(),
+                
+                // Forma de pagamento
+                formaPagamento: $('input[name="formaPagamento"]:checked').val(),
+                
+                // Dados do cartão (se aplicável)
+                numeroCartao: $('#numeroCartao').val(),
+                nomeCartao: $('#nomeCartao').val(),
+                mesVencimento: $('#mesVencimento').val(),
+                cvv: $('#cvv').val(),
+                parcelas: $('#parcelas').val(),
+                
+                // Observações
+                observacoes: $('#observacoes').val()
+            };
+            
+            $.ajax({
+                url: '/pedidos/finalizar',
+                method: 'POST',
+                data: dadosPedido,
+                success: function(response) {
+                    if (response.success) {
+                        $('#numeroPedido').text(response.numeroPedido);
+                        $('#confirmacaoModal').modal('show');
+                    } else {
+                        alert('Erro ao processar pedido: ' + response.message);
+                    }
+                },
+                error: function() {
+                    alert('Erro ao processar pedido. Tente novamente.');
+                },
+                complete: function() {
+                    $('#loadingOverlay').hide();
+                }
+            });
+        }
+        
+        // Prevenir o modal de fechar clicando fora
+        $('#confirmacaoModal').modal({
+            backdrop: 'static',
+            keyboard: false
+        });
+    </script>
+    
+    <style>
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        
+        .is-invalid {
+            border-color: #dc3545;
+        }
+        
+        .payment-method {
+            transition: all 0.3s ease;
+        }
+        
+        .payment-method:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+    </style>
+</body>
+</html>

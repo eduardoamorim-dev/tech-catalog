@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head('Meu Carrinho')">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Carrinho</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .cart-item {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .cart-item:hover {
+            background-color: #f8f9fa;
+            border-left-color: #007bff;
+        }
+        .quantity-input {
+            width: 80px;
+            text-align: center;
+        }
+        .btn-quantity {
+            width: 30px;
+            height: 30px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .cart-summary {
+            position: sticky;
+            top: 100px;
+        }
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            display: none;
+            z-index: 9999;
+        }
+        .loading-spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .out-of-stock {
+            background-color: #fff5f5;
+            border-left-color: #dc3545 !important;
+        }
+        .stock-warning {
+            color: #dc3545;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Carregando...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <nav th:replace="fragments/navbar :: navbar('carrinho')"></nav>
+    
+    <div class="container mt-4">
+        <!-- Cabeçalho da Página -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2><i class="fas fa-shopping-cart mr-2"></i>Meu Carrinho</h2>
+                        <p class="text-muted" th:if="${temItens}">
+                            Você tem <span th:text="${resumoCarrinho.totalItens}" id="totalItensText"></span> item(s) em seu carrinho
+                        </p>
+                    </div>
+                    <div th:if="${temItens}">
+                        <button type="button" class="btn btn-outline-danger" id="btnLimparCarrinho">
+                            <i class="fas fa-trash mr-1"></i>Limpar Carrinho
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mensagens de Alerta -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle mr-2"></i>
+            <span th:text="${successMessage}"></span>
+            <button type="button" class="close" data-dismiss="alert">
+                <span>&times;</span>
+            </button>
+        </div>
+        
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle mr-2"></i>
+            <span th:text="${errorMessage}"></span>
+            <button type="button" class="close" data-dismiss="alert">
+                <span>&times;</span>
+            </button>
+        </div>
+
+        <!-- Alertas Dinâmicos -->
+        <div id="alertContainer"></div>
+
+        <!-- Carrinho Vazio -->
+        <div th:unless="${temItens}" class="text-center py-5" id="carrinhoVazio">
+            <i class="fas fa-shopping-cart fa-4x text-muted mb-3"></i>
+            <h4>Seu carrinho está vazio</h4>
+            <p class="text-muted mb-4">Adicione produtos ao seu carrinho para continuar comprando</p>
+            <a href="/techcatalog" class="btn btn-primary">
+                <i class="fas fa-shopping-bag mr-2"></i>Continuar Comprando
+            </a>
+        </div>
+
+        <!-- Conteúdo do Carrinho -->
+        <div th:if="${temItens}" class="row" id="carrinhoConteudo">
+            <!-- Itens do Carrinho -->
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">Itens do Carrinho</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="itensCarrinho">
+                            <div th:each="item : ${itensCarrinho}" 
+                                 class="cart-item p-3 border-bottom" 
+                                 th:id="'item-' + ${item.produto.id}"
+                                 th:data-produto-id="${item.produto.id}">
+                                
+                                <div class="row align-items-center">
+                                    <!-- Imagem do Produto -->
+                                    <div class="col-md-2 col-sm-3">
+                                        <img th:src="${item.produto.imagemUrl}" 
+                                             th:alt="${item.produto.titulo}"
+                                             class="img-fluid rounded"
+                                             style="max-height: 100px; object-fit: cover;">
+                                    </div>
+                                    
+                                    <!-- Informações do Produto -->
+                                    <div class="col-md-4 col-sm-5">
+                                        <h6 class="mb-1" th:text="${item.produto.titulo}"></h6>
+                                        <!-- <p class="text-muted small mb-1" th:text="${item.produto.descricaoProduto}"></p> -->
+                                        <p class="text-primary font-weight-bold mb-0">
+                                            R$ <span th:text="${#numbers.formatDecimal(item.produto.valorBase, 1, 2)}"></span>
+                                        </p>
+                                        <div class="stock-info mt-1">
+                                            <small class="text-muted">
+                                                Estoque: <span th:text="${item.produto.nivelEstoque}"></span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Controles de Quantidade -->
+                                    <div class="col-md-3 col-sm-4">
+                                        <div class="d-flex align-items-center justify-content-center">
+                                            <button class="btn btn-outline-secondary btn-sm btn-quantity btn-decrease" 
+                                                    th:data-produto-id="${item.produto.id}">
+                                                <i class="fas fa-minus"></i>
+                                            </button>
+                                            <input type="number" 
+                                                   class="form-control form-control-sm quantity-input mx-2"
+                                                   th:value="${item.quantidade}"
+                                                   min="1" 
+                                                   th:max="${item.produto.nivelEstoque}"
+                                                   th:data-produto-id="${item.produto.id}">
+                                            <button class="btn btn-outline-secondary btn-sm btn-quantity btn-increase" 
+                                                    th:data-produto-id="${item.produto.id}">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                        </div>
+                                        <div class="stock-warning text-center mt-1" style="display: none;">
+                                            <small>Estoque insuficiente</small>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Valor Total e Remover -->
+                                    <div class="col-md-3 col-sm-12 text-right">
+                                        <div class="d-flex flex-column align-items-end">
+                                            <h6 class="mb-2 font-weight-bold text-success">
+                                                R$ <span class="valor-total-item" 
+                                                        th:text="${#numbers.formatDecimal(item.valorTotal, 1, 2)}"></span>
+                                            </h6>
+                                            <button class="btn btn-outline-danger btn-sm btn-remover" 
+                                                    th:data-produto-id="${item.produto.id}">
+                                                <i class="fas fa-trash mr-1"></i>Remover
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resumo do Carrinho -->
+            <div class="col-lg-4">
+                <div class="card cart-summary">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Resumo do Pedido</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Itens (<span id="resumoTotalItens" th:text="${resumoCarrinho.totalItens}"></span>):</span>
+                            <span>R$ <span id="resumoSubtotal" th:text="${#numbers.formatDecimal(resumoCarrinho.subtotal, 1, 2)}"></span></span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Frete:</span>
+                            <span class="text-success">Grátis</span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between mb-3">
+                            <strong>Total:</strong>
+                            <strong class="text-success">R$ <span id="resumoTotal" th:text="${#numbers.formatDecimal(resumoCarrinho.total, 1, 2)}"></span></strong>
+                        </div>
+                        
+                        <button class="btn btn-success btn-block btn-lg mb-3" id="btnCheckout">
+                            <i class="fas fa-credit-card mr-2"></i>Finalizar Compra
+                        </button>
+                        
+                        <a href="/techcatalog" class="btn btn-outline-primary btn-block">
+                            <i class="fas fa-arrow-left mr-2"></i>Continuar Comprando
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Objeto para gerenciar o carrinho
+        const CarrinhoManager = {
+            // Utilitários
+            showLoading: function() {
+                $('#loadingOverlay').show();
+            },
+            
+            hideLoading: function() {
+                $('#loadingOverlay').hide();
+            },
+            
+            showAlert: function(type, message) {
+                const iconClass = type === 'success' ? 'check-circle' : 
+                                 type === 'warning' ? 'exclamation-triangle' : 
+                                 'exclamation-triangle';
+                
+                const alertHtml = `
+                    <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                        <i class="fas fa-${iconClass} mr-2"></i>
+                        ${message}
+                        <button type="button" class="close" data-dismiss="alert">
+                            <span>&times;</span>
+                        </button>
+                    </div>
+                `;
+                $('#alertContainer').html(alertHtml);
+                
+                // Auto-hide após 5 segundos
+                setTimeout(() => {
+                    $('.alert').alert('close');
+                }, 5000);
+            },
+            
+            formatCurrency: function(value) {
+                return parseFloat(value).toFixed(2).replace('.', ',');
+            },
+            
+            atualizarResumo: function(resumo) {
+                if (resumo) {
+                    $('#resumoTotalItens').text(resumo.totalItens);
+                    $('#totalItensText').text(resumo.totalItens);
+                    $('#resumoSubtotal').text(this.formatCurrency(resumo.subtotal));
+                    $('#resumoTotal').text(this.formatCurrency(resumo.total));
+                }
+            },
+            
+            // Funções principais
+            alterarQuantidade: function(button, delta) {
+                const idProduto = $(button).data('idProduto');
+                const input = $(button).siblings('input[type="number"]');
+                const currentValue = parseInt(input.val()) || 0;
+                const newValue = currentValue + delta;
+                const maxValue = parseInt(input.attr('max')) || 999;
+                
+                console.log('Alterando quantidade:', { idProduto, currentValue, delta, newValue, maxValue });
+                
+                if (newValue >= 1 && newValue <= maxValue) {
+                    input.val(newValue);
+                    this.atualizarQuantidadeNoServidor(idProduto, newValue);
+                } else if (newValue > maxValue) {
+                    this.showAlert('warning', 'Quantidade solicitada maior que o estoque disponível');
+                } else if (newValue < 1) {
+                    this.showAlert('warning', 'Quantidade mínima é 1');
+                }
+            },
+            
+            atualizarQuantidade: function(input) {
+                const idProduto = $(input).data('idProduto');
+                const quantidade = parseInt($(input).val()) || 1;
+                const maxValue = parseInt($(input).attr('max')) || 999;
+                
+                console.log('Atualizando quantidade:', { idProduto, quantidade, maxValue });
+                
+                if (quantidade < 1) {
+                    $(input).val(1);
+                    this.atualizarQuantidadeNoServidor(idProduto, 1);
+                } else if (quantidade > maxValue) {
+                    $(input).val(maxValue);
+                    this.showAlert('warning', 'Quantidade ajustada para o máximo disponível em estoque');
+                    this.atualizarQuantidadeNoServidor(idProduto, maxValue);
+                } else {
+                    this.atualizarQuantidadeNoServidor(idProduto, quantidade);
+                }
+            },
+            
+            atualizarQuantidadeNoServidor: function(idProduto, quantidade) {
+                console.log('Enviando atualização para servidor:', { idProduto, quantidade });
+                this.showLoading();
+                
+                $.ajax({
+                    url: '/carrinho/atualizar',
+                    method: 'POST',
+                    data: {
+                        idProduto: idProduto,
+                        quantidade: quantidade
+                    },
+                    success: (response) => {
+                        console.log('Resposta do servidor:', response);
+                        if (response.success) {
+                            // Atualizar valor total do item
+                            $(`#item-${idProduto} .valor-total-item`).text(this.formatCurrency(response.valorTotalItem));
+                            
+                            // Atualizar resumo
+                            this.atualizarResumo(response.carrinhoResumo);
+                            
+                            this.showAlert('success', response.message);
+                        } else {
+                            this.showAlert('danger', response.message);
+                        }
+                    },
+                    error: (xhr) => {
+                        console.error('Erro na requisição:', xhr);
+                        const response = xhr.responseJSON;
+                        this.showAlert('danger', response ? response.message : 'Erro ao atualizar quantidade');
+                    },
+                    complete: () => {
+                        this.hideLoading();
+                    }
+                });
+            },
+            
+            removerItem: function(button) {
+                const idProduto = $(button).data('idProduto');
+                
+                if (confirm('Tem certeza que deseja remover este item do carrinho?')) {
+                    console.log('Removendo item:', idProduto);
+                    this.showLoading();
+                    
+                    $.ajax({
+                        url: '/carrinho/remover',
+                        method: 'POST',
+                        data: {
+                            idProduto: idProduto
+                        },
+                        success: (response) => {
+                            console.log('Item removido:', response);
+                            if (response.success) {
+                                // Remover item da tela
+                                $(`#item-${idProduto}`).fadeOut(300, function() {
+                                    $(this).remove();
+                                    
+                                    // Verificar se carrinho ficou vazio
+                                    if ($('#itensCarrinho .cart-item').length === 0) {
+                                        $('#carrinhoConteudo').hide();
+                                        $('#carrinhoVazio').show();
+                                    }
+                                });
+                                
+                                // Atualizar resumo
+                                CarrinhoManager.atualizarResumo(response.carrinhoResumo);
+                                
+                                CarrinhoManager.showAlert('success', response.message);
+                            } else {
+                                CarrinhoManager.showAlert('danger', response.message);
+                            }
+                        },
+                        error: (xhr) => {
+                            console.error('Erro ao remover:', xhr);
+                            const response = xhr.responseJSON;
+                            CarrinhoManager.showAlert('danger', response ? response.message : 'Erro ao remover item');
+                        },
+                        complete: () => {
+                            this.hideLoading();
+                        }
+                    });
+                }
+            },
+            
+            limparCarrinho: function() {
+                if (confirm('Tem certeza que deseja limpar todo o carrinho?')) {
+                    window.location.href = '/carrinho/limpar';
+                }
+            },
+            
+            verificarEstoqueEProsseguir: function() {
+                console.log('Verificando estoque...');
+                this.showLoading();
+                
+                $.ajax({
+                    url: '/carrinho/verificar-estoque',
+                    method: 'GET',
+                    success: (response) => {
+                        console.log('Verificação de estoque:', response);
+                        if (response.carrinhoValido) {
+                            window.location.href = '/carrinho/checkout';
+                        } else {
+                            // Marcar itens com problema de estoque
+                            if (response.itensComProblema) {
+                                response.itensComProblema.forEach((item) => {
+                                    const itemElement = $(`#item-${item.produto.id}`);
+                                    itemElement.addClass('out-of-stock');
+                                    itemElement.find('.stock-warning').show();
+                                });
+                            }
+                            
+                            this.showAlert('danger', 'Alguns itens em seu carrinho não possuem estoque suficiente. Ajuste as quantidades para continuar.');
+                        }
+                    },
+                    error: (xhr) => {
+                        console.error('Erro na verificação:', xhr);
+                        const response = xhr.responseJSON;
+                        this.showAlert('danger', response ? response.error : 'Erro ao verificar estoque');
+                    },
+                    complete: () => {
+                        this.hideLoading();
+                    }
+                });
+            },
+            
+            verificarEstoquePeriodico: function() {
+                if ($('#itensCarrinho .cart-item').length > 0) {
+                    $.ajax({
+                        url: '/carrinho/verificar-estoque',
+                        method: 'GET',
+                        success: (response) => {
+                            // Remover marcações anteriores
+                            $('.cart-item').removeClass('out-of-stock');
+                            $('.stock-warning').hide();
+                            
+                            if (!response.carrinhoValido && response.itensComProblema) {
+                                response.itensComProblema.forEach((item) => {
+                                    const itemElement = $(`#item-${item.produto.id}`);
+                                    itemElement.addClass('out-of-stock');
+                                    itemElement.find('.stock-warning').show();
+                                });
+                            }
+                        },
+                        error: (xhr) => {
+                            console.warn('Erro na verificação periódica de estoque:', xhr);
+                        }
+                    });
+                }
+            },
+            
+            init: function() {
+                console.log('Inicializando CarrinhoManager...');
+                
+                // Event listeners usando delegação
+                $(document).on('click', '.btn-decrease', (e) => {
+                    e.preventDefault();
+                    this.alterarQuantidade(e.currentTarget, -1);
+                });
+                
+                $(document).on('click', '.btn-increase', (e) => {
+                    e.preventDefault();
+                    this.alterarQuantidade(e.currentTarget, 1);
+                });
+                
+                $(document).on('change', '.quantity-input', (e) => {
+                    this.atualizarQuantidade(e.currentTarget);
+                });
+                
+                $(document).on('click', '.btn-remover', (e) => {
+                    e.preventDefault();
+                    this.removerItem(e.currentTarget);
+                });
+                
+                $(document).on('click', '#btnLimparCarrinho', (e) => {
+                    e.preventDefault();
+                    this.limparCarrinho();
+                });
+                
+                $(document).on('click', '#btnCheckout', (e) => {
+                    e.preventDefault();
+                    this.verificarEstoqueEProsseguir();
+                });
+                
+                // Verificar estoque periodicamente (a cada 30 segundos)
+                setInterval(() => {
+                    this.verificarEstoquePeriodico();
+                }, 30000);
+                
+                // Remover alertas automaticamente após 5 segundos
+                setTimeout(() => {
+                    $('.alert').fadeOut();
+                }, 5000);
+                
+                console.log('CarrinhoManager inicializado com sucesso!');
+            }
+        };
+        
+        // Funções globais para compatibilidade (se necessário)
+        function alterarQuantidade(button, delta) {
+            CarrinhoManager.alterarQuantidade(button, delta);
+        }
+        
+        function atualizarQuantidade(input) {
+            CarrinhoManager.atualizarQuantidade(input);
+        }
+        
+        function removerItem(button) {
+            CarrinhoManager.removerItem(button);
+        }
+        
+        function limparCarrinho() {
+            CarrinhoManager.limparCarrinho();
+        }
+        
+        function verificarEstoqueEProsseguir() {
+            CarrinhoManager.verificarEstoqueEProsseguir();
+        }
+        
+        // Inicialização quando o documento estiver pronto
+        $(document).ready(function() {
+            CarrinhoManager.init();
+        });
+    </script>
+</body>
+</html>

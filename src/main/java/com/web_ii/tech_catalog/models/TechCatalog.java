@@ -26,7 +26,7 @@ public class TechCatalog {
 
     @NotNull(message = "Descricao não pode ser nula")
     @Column(name = "descricao_produto", columnDefinition = "TEXT")
-    private String descricao_produto;
+    private String descricaoProduto;
 
     @Column(name = "especificacao_tecnica", columnDefinition = "TEXT")
     private String especificacaoTecnica;
@@ -76,11 +76,11 @@ public class TechCatalog {
     }
 
     public String getDescricaoProduto() {
-        return descricao_produto;
+        return descricaoProduto;
     }
 
-    public void setDescricaoProduto(String descricao_produto) {
-        this.descricao_produto = descricao_produto;
+    public void setDescricaoProduto(String descricaoProduto) {
+        this.descricaoProduto = descricaoProduto;
     }
 
     public String getEspecificacaoTecnica() {

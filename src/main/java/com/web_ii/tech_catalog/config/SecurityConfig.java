@@ -33,6 +33,7 @@ public class SecurityConfig {
 		http.authorizeHttpRequests(requests -> requests
 				.requestMatchers("/", "/home", "/register", "/saveUser").permitAll()
 				.requestMatchers("/techcatalog/*").hasAuthority("Admin")
+				.requestMatchers("/carrinho/*").not().hasAuthority("Admin")
 				.anyRequest().authenticated())
 			.formLogin(login -> login
 				.successHandler(customSuccessHandler)) // redirecionamento customizado
@@ -44,6 +45,7 @@ public class SecurityConfig {
 
 		return http.build();
 	}
+
 	
 	@Bean
 	public AuthenticationProvider authenticationProvider() {

@@ -35,6 +35,11 @@ public class UserServiceImpl implements IUserService, UserDetailsService {
         user = userRepo.save(user);
         return user.getId();
     }
+    
+    @Override
+    public Optional<User> findUserByEmail(String email) {
+        return userRepo.findUserByEmail(email);
+    }
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -62,4 +67,5 @@ public class UserServiceImpl implements IUserService, UserDetailsService {
 
         return springUser;
     }
+
 }
