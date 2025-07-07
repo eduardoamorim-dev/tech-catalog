@@ -93,3 +93,4 @@ public interface CarrinhoRepository extends JpaRepository<Carrinho, Long> {
                         @Param("idProduto") Long idProduto, 
                         @Param("quantidade") Integer quantidade);
 }
+
