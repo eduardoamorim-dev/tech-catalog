@@ -30,8 +30,8 @@ public class UserServiceImpl implements IUserService, UserDetailsService {
     @Override
     public Integer saveUser(User user) {
         String passwd = user.getPassword();
-        String encodedPasswod = passwordEncoder.encode(passwd);
-        user.setPassword(encodedPasswod);
+        String encodedPassword = passwordEncoder.encode(passwd);
+        user.setPassword(encodedPassword);
         user = userRepo.save(user);
         return user.getId();
     }
@@ -39,6 +39,49 @@ public class UserServiceImpl implements IUserService, UserDetailsService {
     @Override
     public Optional<User> findUserByEmail(String email) {
         return userRepo.findUserByEmail(email);
+    }
+
+    @Override
+    public List<User> getAllUsers() {
+        return userRepo.findAll();
+    }
+
+    @Override
+    public Optional<User> getUserById(Integer id) {
+        return userRepo.findById(id);
+    }
+
+    @Override
+    public void updateUser(User user, String newPassword) {
+        Optional<User> existingUserOpt = userRepo.findById(user.getId());
+        
+        if (existingUserOpt.isPresent()) {
+            User existingUser = existingUserOpt.get();
+            
+            // Atualiza os dados básicos
+            existingUser.setName(user.getName());
+            existingUser.setEmail(user.getEmail());
+            existingUser.setRoles(user.getRoles());
+            
+            // Atualiza a senha apenas se uma nova for fornecida
+            if (newPassword != null && !newPassword.trim().isEmpty()) {
+                String encodedPassword = passwordEncoder.encode(newPassword);
+                existingUser.setPassword(encodedPassword);
+            }
+            
+            userRepo.save(existingUser);
+        } else {
+            throw new RuntimeException("Usuário não encontrado com ID: " + user.getId());
+        }
+    }
+
+    @Override
+    public void deleteUser(Integer id) {
+        if (userRepo.existsById(id)) {
+            userRepo.deleteById(id);
+        } else {
+            throw new RuntimeException("Usuário não encontrado com ID: " + id);
+        }
     }
 
     @Override
@@ -62,10 +105,8 @@ public class UserServiceImpl implements IUserService, UserDetailsService {
                     email,
                     user.getPassword(),
                     ga);
-
         }
 
         return springUser;
     }
-
 }
