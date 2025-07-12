@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Detalhes do Pedido</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background-color: #f8f9fa;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .pedido-header {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white;
+        padding: 30px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+      .info-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        border: none;
+      }
+      .card-header {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        border-bottom: 2px solid #f1f3f4;
+        border-radius: 12px 12px 0 0 !important;
+        padding: 20px;
+      }
+      .card-header h5 {
+        margin: 0;
+        color: #495057;
+        font-weight: 600;
+      }
+      .status-badge {
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .status-pendente {
+        background-color: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+      }
+      .status-processando {
+        background-color: #cce5ff;
+        color: #0066cc;
+        border: 1px solid #99d6ff;
+      }
+      .status-enviado {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+      .status-entregue {
+        background-color: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+      }
+      .status-cancelado {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+      .item-row {
+        padding: 15px 0;
+        border-bottom: 1px solid #f1f3f4;
+      }
+      .item-row:last-child {
+        border-bottom: none;
+      }
+      .item-image {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .item-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .item-title {
+        font-weight: 600;
+        color: #212529;
+        margin-bottom: 5px;
+      }
+      .item-details {
+        color: #6c757d;
+        font-size: 0.9rem;
+      }
+      .item-price {
+        font-weight: 600;
+        color: #28a745;
+        text-align: right;
+      }
+      .total-section {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        padding: 20px;
+        border-radius: 8px;
+        margin-top: 20px;
+      }
+      .total-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+      }
+      .total-row:last-child {
+        border-top: 2px solid #dee2e6;
+        padding-top: 15px;
+        margin-top: 10px;
+      }
+      .total-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #28a745;
+      }
+      .btn-back {
+        background: linear-gradient(135deg, #6c757d, #5a6268);
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+      }
+      .btn-back:hover {
+        background: linear-gradient(135deg, #5a6268, #495057);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+      }
+      .btn-danger {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+      }
+      .btn-danger:hover {
+        background: linear-gradient(135deg, #c82333, #bd2130);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+      }
+      .empty-items {
+        text-align: center;
+        padding: 40px;
+        color: #6c757d;
+      }
+      .empty-items i {
+        font-size: 3rem;
+        margin-bottom: 15px;
+        color: #dee2e6;
+      }
+      @media (max-width: 768px) {
+        .container {
+          padding: 10px;
+        }
+        .pedido-header {
+          padding: 20px;
+        }
+        .item-row {
+          flex-direction: column;
+          gap: 10px;
+        }
+        .item-price {
+          text-align: left;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav th:replace="fragments/navbar :: navbar('pedidos')"></nav>
+
+    <div class="container" style="margin-top: 80px">
+      <!-- Cabeçalho do Pedido -->
+      <div class="pedido-header">
+        <div class="row align-items-center">
+          <div class="col-md-6">
+            <h1 class="mb-2">
+              <i class="fas fa-receipt me-2"></i>
+              Pedido #<span th:text="${pedido.id}">000</span>
+            </h1>
+            <p class="mb-0">
+              <i class="fas fa-calendar me-1"></i>
+              Realizado em
+              <span
+                th:text="${#temporals.format(pedido.dataPedido, 'dd/MM/yyyy HH:mm')}"
+                >Data</span
+              >
+            </p>
+          </div>
+          <div class="col-md-6 text-md-end mt-3 mt-md-0">
+            <span
+              class="status-badge"
+              th:class="${'status-badge status-' + #strings.toLowerCase(pedido.status)}"
+              th:text="${pedido.status}"
+              >Status</span
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- Mensagens de erro/sucesso -->
+      <div
+        th:if="${errorMessage}"
+        class="alert alert-danger alert-dismissible fade show"
+        role="alert"
+      >
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${errorMessage}">Erro</span>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+        ></button>
+      </div>
+
+      <div
+        th:if="${successMessage}"
+        class="alert alert-success alert-dismissible fade show"
+        role="alert"
+      >
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${successMessage}">Sucesso</span>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+        ></button>
+      </div>
+
+      <div class="row">
+        <!-- Informações do Pedido -->
+        <div class="col-lg-8">
+          <!-- Dados de Entrega -->
+          <div class="info-card">
+            <div class="card-header">
+              <h5>
+                <i class="fas fa-map-marker-alt me-2"></i>Dados de Entrega
+              </h5>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-6">
+                  <strong>Endereço:</strong>
+                  <p class="text-muted" th:text="${pedido.enderecoEntrega}">
+                    Endereço de entrega
+                  </p>
+                </div>
+                <div class="col-md-6">
+                  <strong>Forma de Pagamento:</strong>
+                  <p class="text-muted" th:text="${pedido.formaPagamento}">
+                    Forma de pagamento
+                  </p>
+                </div>
+              </div>
+              <div th:if="${pedido.observacoes}" class="mt-3">
+                <strong>Observações:</strong>
+                <p class="text-muted" th:text="${pedido.observacoes}">
+                  Observações do pedido
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Itens do Pedido -->
+          <div class="info-card">
+            <div class="card-header">
+              <h5><i class="fas fa-shopping-cart me-2"></i>Itens do Pedido</h5>
+            </div>
+            <div class="card-body">
+              <!-- Lista de Itens -->
+              <div th:if="${itens != null and !#lists.isEmpty(itens)}">
+                <div
+                  th:each="item : ${itens}"
+                  class="item-row d-flex align-items-center gap-3"
+                >
+                  <div class="item-image">
+                    <!-- Imagem do produto usando o Map -->
+                    <img
+                      th:if="${produtos != null and produtos[item.idProduto] != null and produtos[item.idProduto].imagem != null}"
+                      th:src="@{/uploads/{imagem}(imagem=${produtos[item.idProduto].imagem})}"
+                      th:alt="${produtos[item.idProduto].titulo}"
+                      class="w-100 h-100 object-fit-cover"
+                    />
+
+                    <!-- Ícone padrão se não houver imagem -->
+                    <i
+                      th:unless="${produtos != null and produtos[item.idProduto] != null and produtos[item.idProduto].imagem != null}"
+                      class="fas fa-box fa-2x text-muted"
+                    ></i>
+                  </div>
+
+                  <div class="item-info">
+                    <!-- Nome do produto -->
+                    <div class="item-title">
+                      <span
+                        th:if="${produtos != null and produtos[item.idProduto] != null}"
+                        th:text="${produtos[item.idProduto].titulo}"
+                        >Nome do Produto</span
+                      >
+                      <span
+                        th:unless="${produtos != null and produtos[item.idProduto] != null}"
+                      >
+                        Produto não encontrado
+                      </span>
+                    </div>
+
+                    <!-- Detalhes do item -->
+                    <div class="item-details">
+                      Qtd: <span th:text="${item.quantidade}">1</span> × R$
+                      <span
+                        th:text="${#numbers.formatDecimal(item.valorUnitario, 1, 2)}"
+                        >0,00</span
+                      >
+                    </div>
+
+                    <!-- Especificações (se existirem) -->
+                    <div
+                      th:if="${produtos != null and produtos[item.idProduto] != null and produtos[item.idProduto].especificacoes != null}"
+                      class="item-details"
+                    >
+                      <small
+                        th:text="${produtos[item.idProduto].especificacoes}"
+                        >Especificações</small
+                      >
+                    </div>
+                  </div>
+
+                  <div class="item-price">
+                    R$
+                    <span
+                      th:text="${#numbers.formatDecimal(item.valorTotal, 1, 2)}"
+                      >0,00</span
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <!-- Estado vazio -->
+              <div
+                th:unless="${itens != null and !#lists.isEmpty(itens)}"
+                class="empty-items"
+              >
+                <i class="fas fa-box-open"></i>
+                <h5>Nenhum item encontrado</h5>
+                <p class="text-muted">
+                  Não foi possível carregar os itens deste pedido.
+                </p>
+              </div>
+
+              <!-- Total -->
+              <div class="total-section">
+                <div class="total-row">
+                  <span>Subtotal:</span>
+                  <span
+                    >R$
+                    <span
+                      th:text="${#numbers.formatDecimal(pedido.valorTotal, 1, 2)}"
+                      >0,00</span
+                    ></span
+                  >
+                </div>
+                <div class="total-row">
+                  <span>Frete:</span>
+                  <span class="text-success">Grátis</span>
+                </div>
+                <div class="total-row">
+                  <strong>Total:</strong>
+                  <strong class="total-value"
+                    >R$
+                    <span
+                      th:text="${#numbers.formatDecimal(pedido.valorTotal, 1, 2)}"
+                      >0,00</span
+                    ></strong
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+          <!-- Ações -->
+          <div class="info-card">
+            <div class="card-header">
+              <h5><i class="fas fa-cogs me-2"></i>Ações</h5>
+            </div>
+            <div class="card-body">
+              <div class="d-grid gap-2">
+                <a href="/pedidos" class="btn btn-back">
+                  <i class="fas fa-arrow-left me-2"></i>
+                  Voltar aos Pedidos
+                </a>
+
+                <div th:if="${pedido.status == 'PENDENTE'}">
+                  <button
+                    type="button"
+                    class="btn btn-danger w-100"
+                    th:onclick="'confirmCancel(' + ${pedido.id} + ')'"
+                  >
+                    <i class="fas fa-times me-2"></i>
+                    Cancelar Pedido
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de Confirmação de Cancelamento -->
+    <div class="modal fade" id="cancelModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">
+              <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+              Confirmar Cancelamento
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <p>Tem certeza que deseja cancelar este pedido?</p>
+            <p class="text-muted small">
+              Esta ação não pode ser desfeita e o estoque dos produtos será
+              restaurado.
+            </p>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              <i class="fas fa-times me-1"></i>
+              Não, manter pedido
+            </button>
+            <form id="cancelForm" method="post" style="display: inline">
+              <button type="submit" class="btn btn-danger">
+                <i class="fas fa-trash me-1"></i>
+                Sim, cancelar pedido
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+      // Função para confirmar cancelamento
+      function confirmCancel(pedidoId) {
+        const form = document.getElementById("cancelForm");
+        form.action = `/pedidos/${pedidoId}/cancelar`;
+
+        const modal = new bootstrap.Modal(
+          document.getElementById("cancelModal")
+        );
+        modal.show();
+      }
+
+      // Auto-remover alertas
+      document.addEventListener("DOMContentLoaded", function () {
+        const alerts = document.querySelectorAll(".alert");
+        alerts.forEach((alert) => {
+          setTimeout(() => {
+            if (alert.parentNode) {
+              alert.remove();
+            }
+          }, 5000);
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -96,6 +96,28 @@
               >
             </a>
           </li>
+
+          <li
+            class="nav-item"
+            th:classappend="${activeItem == 'pedidos'} ? 'active' : ''"
+          >
+            <a
+              sec:authorize="hasAuthority('user')"
+              class="nav-link"
+              th:href="@{/pedidos}"
+            >
+              <i class="fas fa-clipboard-list mr-1" id="pedidos-icon"></i>
+              Pedidos
+              <span
+                id="pedidos-count"
+                class="badge badge-info ml-1"
+                style="display: none"
+              ></span>
+              <span th:if="${activeItem == 'pedidos'}" class="sr-only"
+                >(current)</span
+              >
+            </a>
+          </li>
         </ul>
         <form class="form-inline my-2 my-lg-0" action="/logout" method="post">
           <input
