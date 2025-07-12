@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="fragments/head :: head('Edição de Usuário')"></head>
+
+<body class="bg-light">
+    <!-- Navbar -->
+    <nav th:replace="fragments/navbar :: navbar('gerenciarUsuarios')"></nav>
+
+    <div class="container">
+        <!-- Mensagem de sucesso/erro -->
+        <div th:if="${msg}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle mr-2"></i>
+            <span th:text="${msg}"></span>
+            <button type="button" class="close" data-dismiss="alert">
+                <span>&times;</span>
+            </button>
+        </div>
+
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle mr-2"></i>
+            <span th:text="${error}"></span>
+            <button type="button" class="close" data-dismiss="alert">
+                <span>&times;</span>
+            </button>
+        </div>
+
+        <div class="card shadow mb-4">
+            <div class="card-header bg-primary text-white">
+                <h3 class="card-title mb-0">
+                    <i class="fas fa-user-edit mr-2"></i> Editar Usuário
+                </h3>
+            </div>
+            <div class="card-body">
+                <form action="#" th:action="@{/admin/users/update}" th:object="${user}" method="POST">
+                    <input type="hidden" th:field="*{id}" />
+
+                    <div class="form-section">
+                        <h4 class="section-title">Informações Pessoais</h4>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="name">
+                                    <i class="fas fa-user mr-1"></i> Nome Completo
+                                </label>
+                                <input type="text" th:field="*{name}" class="form-control" id="name"
+                                    placeholder="Digite o nome completo" required>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="email">
+                                    <i class="fas fa-envelope mr-1"></i> Email
+                                </label>
+                                <input type="email" th:field="*{email}" class="form-control" id="email"
+                                    placeholder="Digite o email" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h4 class="section-title">Segurança</h4>
+                        <div class="form-row">
+                            <div class="form-group col-md-12">
+                                <label for="password">
+                                    <i class="fas fa-lock mr-1"></i> Nova Senha
+                                </label>
+                                <input type="password" name="password" class="form-control" id="password"
+                                    placeholder="Digite uma nova senha (deixe em branco para manter a atual)">
+                                <small class="form-text text-muted">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    Deixe em branco se não quiser alterar a senha atual
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h4 class="section-title">Papéis de Usuário</h4>
+                        <div class="form-row">
+                            <div class="form-group col-md-12">
+                                <label>
+                                    <i class="fas fa-shield-alt mr-1"></i> Selecione os papéis do usuário
+                                </label>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" name="roles" th:field="*{roles}" value="user" 
+                                                   id="roleUser" class="custom-control-input">
+                                            <label class="custom-control-label" for="roleUser">
+                                                <i class="fas fa-user mr-1 text-success"></i> Usuário
+                                            </label>
+                                            <small class="form-text text-muted">Acesso básico ao sistema</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" name="roles" th:field="*{roles}" value="Admin" 
+                                                   id="roleAdmin" class="custom-control-input">
+                                            <label class="custom-control-label" for="roleAdmin">
+                                                <i class="fas fa-crown mr-1 text-danger"></i> Administrador
+                                            </label>
+                                            <small class="form-text text-muted">Acesso completo ao sistema</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h4 class="section-title">Informações do Sistema</h4>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            <strong>ID do Usuário:</strong> <span th:text="*{id}"></span><br>
+                            <strong>Última Atualização:</strong> Esta sessão
+                        </div>
+                    </div>
+
+                    <div class="form-group text-center">
+                        <button type="submit" class="btn btn-success px-4 mx-2">
+                            <i class="fas fa-save mr-1"></i> Salvar Alterações
+                        </button>
+                        <a th:href="@{/admin/users}" class="btn btn-secondary px-4 mx-2">
+                            <i class="fas fa-times mr-1"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <div th:replace="fragments/head :: scripts"></div>
+</body>
+
+</html>
