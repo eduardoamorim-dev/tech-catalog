@@ -18,6 +18,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/pedidos")
@@ -45,18 +46,22 @@ public class PedidoController {
         }
         
         try {
-            User user = userService.findUserByEmail(authentication.getName()).orElse(null);
-            if (user == null) {
+            Optional<User> userOptional = userService.findUserByEmail(authentication.getName());
+            if (!userOptional.isPresent()) {
                 return "redirect:/login";
             }
             
+            User user = userOptional.get();
             List<Pedido> pedidos = pedidoService.listarPedidosDoUsuario(user.getId().longValue());
+            
             model.addAttribute("pedidos", pedidos);
+            model.addAttribute("user", user);
             
             return "pedidos/lista";
             
         } catch (Exception e) {
             model.addAttribute("errorMessage", "Erro ao carregar pedidos: " + e.getMessage());
+            model.addAttribute("pedidos", List.of()); // Lista vazia para evitar erro no template
             return "pedidos/lista";
         }
     }
@@ -71,16 +76,17 @@ public class PedidoController {
         }
         
         try {
-            User user = userService.findUserByEmail(authentication.getName()).orElse(null);
-            if (user == null) {
+            Optional<User> userOptional = userService.findUserByEmail(authentication.getName());
+            if (!userOptional.isPresent()) {
                 return "redirect:/login";
             }
             
+            User user = userOptional.get();
             Pedido pedido = pedidoService.buscarPedidoPorId(id);
             
-            // Verifica se o pedido pertence ao usuário logado
+            // Verifica se o pedido existe e pertence ao usuário logado
             if (pedido == null || !pedido.getIdUser().equals(user.getId().longValue())) {
-                model.addAttribute("errorMessage", "Pedido não encontrado.");
+                model.addAttribute("errorMessage", "Pedido não encontrado ou você não tem permissão para visualizá-lo.");
                 return "redirect:/pedidos";
             }
             
@@ -104,6 +110,7 @@ public class PedidoController {
             model.addAttribute("pedido", pedido);
             model.addAttribute("itens", itens);
             model.addAttribute("produtos", produtos);
+            model.addAttribute("user", user);
             
             return "pedidos/detalhes";
             
@@ -114,44 +121,110 @@ public class PedidoController {
     }
     
     /**
-     * Cancela um pedido (apenas se estiver com status PENDENTE)
+     * Cancelar um pedido
      */
-    // @PostMapping("/{id}/cancelar")
-    // public String cancelarPedido(@PathVariable Long id, Authentication authentication, 
-    //                             RedirectAttributes redirectAttributes) {
-    //     if (authentication == null || !authentication.isAuthenticated()) {
-    //         return "redirect:/login";
-    //     }
+    @PostMapping("/{id}/cancelar")
+    public String cancelarPedido(@PathVariable Long id, 
+                                Authentication authentication,
+                                RedirectAttributes redirectAttributes) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return "redirect:/login";
+        }
         
-    //     try {
-    //         User user = userService.findUserByEmail(authentication.getName()).orElse(null);
-    //         if (user == null) {
-    //             return "redirect:/login";
-    //         }
+        try {
+            Optional<User> userOptional = userService.findUserByEmail(authentication.getName());
+            if (!userOptional.isPresent()) {
+                return "redirect:/login";
+            }
             
-    //         Pedido pedido = pedidoService.buscarPedidoPorId(id);
+            User user = userOptional.get();
+            Pedido pedido = pedidoService.buscarPedidoPorId(id);
             
-    //         if (pedido == null || !pedido.getIdUser().equals(user.getId().longValue())) {
-    //             redirectAttributes.addFlashAttribute("errorMessage", "Pedido não encontrado.");
-    //             return "redirect:/pedidos";
-    //         }
+            // Verifica se o pedido existe e pertence ao usuário logado
+            if (pedido == null || !pedido.getIdUser().equals(user.getId().longValue())) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Pedido não encontrado ou você não tem permissão para cancelá-lo.");
+                return "redirect:/pedidos";
+            }
             
-    //         if (!"PENDENTE".equals(pedido.getStatus())) {
-    //             redirectAttributes.addFlashAttribute("errorMessage", 
-    //                 "Não é possível cancelar este pedido. Status atual: " + pedido.getStatus());
-    //             return "redirect:/pedidos/" + id;
-    //         }
+            // Verificar se o pedido pode ser cancelado
+            if (!"PENDENTE".equals(pedido.getStatus())) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Só é possível cancelar pedidos com status PENDENTE.");
+                return "redirect:/pedidos/" + id;
+            }
             
-    //         pedidoService.cancelarPedido(id);
-    //         redirectAttributes.addFlashAttribute("successMessage", 
-    //             "Pedido #" + id + " cancelado com sucesso!");
+            pedidoService.cancelarPedido(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Pedido cancelado com sucesso!");
             
-    //         return "redirect:/pedidos";
+            return "redirect:/pedidos/" + id;
             
-    //     } catch (Exception e) {
-    //         redirectAttributes.addFlashAttribute("errorMessage", 
-    //             "Erro ao cancelar pedido: " + e.getMessage());
-    //         return "redirect:/pedidos";
-    //     }
-    // }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Erro ao cancelar pedido: " + e.getMessage());
+            return "redirect:/pedidos";
+        }
+    }
+    
+    /**
+     * Página de checkout (criar pedido)
+     */
+    @GetMapping("/checkout")
+    public String checkout(Model model, Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return "redirect:/login";
+        }
+        
+        try {
+            Optional<User> userOptional = userService.findUserByEmail(authentication.getName());
+            if (!userOptional.isPresent()) {
+                return "redirect:/login";
+            }
+            
+            User user = userOptional.get();
+            model.addAttribute("user", user);
+            
+            return "pedidos/checkout";
+            
+        } catch (Exception e) {
+            model.addAttribute("errorMessage", "Erro ao carregar página de checkout: " + e.getMessage());
+            return "redirect:/carrinho";
+        }
+    }
+    
+    /**
+     * Processar checkout (criar pedido)
+     */
+    @PostMapping("/checkout")
+    public String processarCheckout(@RequestParam String enderecoEntrega,
+                                   @RequestParam String formaPagamento,
+                                   @RequestParam(required = false) String observacoes,
+                                   Authentication authentication,
+                                   RedirectAttributes redirectAttributes) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return "redirect:/login";
+        }
+        
+        try {
+            Optional<User> userOptional = userService.findUserByEmail(authentication.getName());
+            if (!userOptional.isPresent()) {
+                return "redirect:/login";
+            }
+            
+            User user = userOptional.get();
+            
+            // Criar pedido a partir do carrinho
+            Pedido pedido = pedidoService.criarPedidoDoCarrinho(
+                user.getId().longValue(), 
+                enderecoEntrega, 
+                formaPagamento, 
+                observacoes
+            );
+            
+            redirectAttributes.addFlashAttribute("successMessage", "Pedido criado com sucesso! Número do pedido: " + pedido.getId());
+            
+            return "redirect:/pedidos/" + pedido.getId();
+            
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Erro ao criar pedido: " + e.getMessage());
+            return "redirect:/pedidos/checkout";
+        }
+    }
 }

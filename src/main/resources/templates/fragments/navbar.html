@@ -89,6 +89,22 @@
 
           <li
             class="nav-item"
+            th:classappend="${activeItem == 'gerenciarPedidos'} ? 'active' : ''"
+          >
+            <a
+              sec:authorize="hasAuthority('Admin')"
+              class="nav-link"
+              th:href="@{/admin/pedidos}"
+            >
+              <i class="fas fa-clipboard-list mr-1"></i> Gerenciar Pedidos
+              <span th:if="${activeItem == 'gerenciarPedidos'}" class="sr-only"
+                >(current)</span
+              >
+            </a>
+          </li>
+
+          <li
+            class="nav-item"
             th:classappend="${activeItem == 'carrinho'} ? 'active' : ''"
           >
             <a

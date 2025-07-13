@@ -13,7 +13,9 @@ public interface IUserService {
     List<User> getAllUsers();
     
     Optional<User> getUserById(Integer id);
-    
+
+	Optional<User> findUserById(Long id);
+	
     void updateUser(User user, String newPassword);
     
     void deleteUser(Integer id);

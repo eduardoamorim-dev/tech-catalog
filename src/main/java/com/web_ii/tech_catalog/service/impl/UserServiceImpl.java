@@ -52,6 +52,11 @@ public class UserServiceImpl implements IUserService, UserDetailsService {
     }
 
     @Override
+    public Optional<User> findUserById(Long id) {
+        return userRepo.findById(id.intValue());
+    }
+
+    @Override
     public void updateUser(User user, String newPassword) {
         Optional<User> existingUserOpt = userRepo.findById(user.getId());
         

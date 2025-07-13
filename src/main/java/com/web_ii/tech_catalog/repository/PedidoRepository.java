@@ -15,6 +15,11 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
     List<Pedido> findByIdUserOrderByDataPedidoDesc(Long userId);
     
     /**
+     * Busca todos os pedidos ordenados por data (mais recentes primeiro)
+     */
+    List<Pedido> findAllByOrderByDataPedidoDesc();
+    
+    /**
      * Busca pedidos por usuário e status
      */
     List<Pedido> findByIdUserAndStatus(Long userId, String status);

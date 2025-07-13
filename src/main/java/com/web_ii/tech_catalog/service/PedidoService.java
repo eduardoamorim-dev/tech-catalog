@@ -95,10 +95,70 @@ public class PedidoService {
     }
     
     /**
+     * Lista todos os pedidos (para admin)
+     */
+    public List<Pedido> listarTodosPedidos() {
+        return pedidoRepository.findAllByOrderByDataPedidoDesc();
+    }
+    
+    /**
      * Busca pedido por ID
      */
     public Pedido buscarPedidoPorId(Long pedidoId) {
         return pedidoRepository.findById(pedidoId).orElse(null);
+    }
+    
+    /**
+     * Atualiza um pedido
+     */
+    @Transactional
+    public Pedido atualizarPedido(Pedido pedido) {
+        return pedidoRepository.save(pedido);
+    }
+    
+    /**
+     * Atualiza apenas o status do pedido
+     */
+    @Transactional
+    public void atualizarStatusPedido(Long pedidoId, String novoStatus) {
+        Pedido pedido = buscarPedidoPorId(pedidoId);
+        
+        if (pedido == null) {
+            throw new RuntimeException("Pedido não encontrado");
+        }
+        
+        pedido.setStatus(novoStatus);
+        pedidoRepository.save(pedido);
+    }
+    
+    /**
+     * Exclui um pedido
+     */
+    @Transactional
+    public void excluirPedido(Long pedidoId) {
+        Pedido pedido = buscarPedidoPorId(pedidoId);
+        
+        if (pedido == null) {
+            throw new RuntimeException("Pedido não encontrado");
+        }
+        
+        // Reverter estoque se o pedido não foi cancelado
+        if (!"CANCELADO".equals(pedido.getStatus())) {
+            List<ItemPedido> itens = itemPedidoService.buscarItensPorPedido(pedidoId);
+            for (ItemPedido item : itens) {
+                TechCatalog produto = produtoService.getTechCatalogById(item.getIdProduto());
+                if (produto != null) {
+                    produto.setNivelEstoque(produto.getNivelEstoque() + item.getQuantidade());
+                    produtoService.saveTechCatalog(produto);
+                }
+            }
+        }
+        
+        // Remover itens do pedido
+        itemPedidoService.removerItensPorPedido(pedidoId);
+        
+        // Remover pedido
+        pedidoRepository.deleteById(pedidoId);
     }
     
     /**
