@@ -219,9 +219,9 @@
                 <div th:if="${temItens}" class="bg-white rounded shadow-sm p-3">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="mb-0">Itens no Carrinho</h5>
-                        <button class="btn btn-outline-danger btn-sm" onclick="limparCarrinho()">
+                        <!-- <button class="btn btn-outline-danger btn-sm" onclick="limparCarrinho()">
                             <i class="fas fa-trash"></i> Limpar Carrinho
-                        </button>
+                        </button> -->
                     </div>
 
                     <div th:each="item : ${itensCarrinho}" class="carrinho-item" th:id="'item-' + ${item.idProduto}">
@@ -613,14 +613,14 @@
             /**
              * Limpa todo o carrinho
              */
-            limparCarrinho() {
-                if (!confirm('Tem certeza que deseja limpar todo o carrinho? Esta ação não pode ser desfeita.')) {
-                    return;
-                }
+            // limparCarrinho() {
+            //     if (!confirm('Tem certeza que deseja limpar todo o carrinho? Esta ação não pode ser desfeita.')) {
+            //         return;
+            //     }
 
-                this.showLoading(true);
-                window.location.href = '/carrinho/limpar';
-            }
+            //     this.showLoading(true);
+            //     window.location.href = '/carrinho/limpar';
+            // }
 
             /**
              * Atualiza o estado dos botões baseado na quantidade e estoque
@@ -785,11 +785,11 @@
             }
         }
 
-        function limparCarrinho() {
-            if (window.carrinhoManager) {
-                window.carrinhoManager.limparCarrinho();
-            }
-        }
+        // function limparCarrinho() {
+        //     if (window.carrinhoManager) {
+        //         window.carrinhoManager.limparCarrinho();
+        //     }
+        // }
 
         function verificarEstoque() {
             if (window.carrinhoManager) {

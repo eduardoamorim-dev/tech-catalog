@@ -50,11 +50,6 @@
       .action-buttons {
         white-space: nowrap;
       }
-
-      .modal-header {
-        background-color: #dc3545;
-        color: white;
-      }
     </style>
   </head>
   <body>
@@ -222,85 +217,11 @@
                         <!-- Botão Editar -->
                         <a
                           th:href="@{/admin/pedidos/{id}/editar(id=${pedido.id})}"
-                          class="btn btn-outline-warning btn-sm me-1"
+                          class="btn btn-outline-warning btn-sm"
                           title="Editar"
                         >
                           <i class="fas fa-edit"></i>
                         </a>
-
-                        <!-- Dropdown para Status -->
-                        <div class="btn-group me-1">
-                          <button
-                            class="btn btn-outline-info btn-sm dropdown-toggle"
-                            type="button"
-                            data-bs-toggle="dropdown"
-                            title="Alterar Status"
-                          >
-                            <i class="fas fa-sync"></i>
-                          </button>
-                          <ul class="dropdown-menu">
-                            <li>
-                              <a
-                                class="dropdown-item"
-                                href="#"
-                                th:onclick="'alterarStatus(' + ${pedido.id} + ', \'PENDENTE\')'"
-                              >
-                                <i class="fas fa-clock text-warning"></i>
-                                Pendente
-                              </a>
-                            </li>
-                            <li>
-                              <a
-                                class="dropdown-item"
-                                href="#"
-                                th:onclick="'alterarStatus(' + ${pedido.id} + ', \'CONFIRMADO\')'"
-                              >
-                                <i class="fas fa-check text-info"></i>
-                                Confirmado
-                              </a>
-                            </li>
-                            <li>
-                              <a
-                                class="dropdown-item"
-                                href="#"
-                                th:onclick="'alterarStatus(' + ${pedido.id} + ', \'ENVIADO\')'"
-                              >
-                                <i class="fas fa-truck text-primary"></i>
-                                Enviado
-                              </a>
-                            </li>
-                            <li>
-                              <a
-                                class="dropdown-item"
-                                href="#"
-                                th:onclick="'alterarStatus(' + ${pedido.id} + ', \'ENTREGUE\')'"
-                              >
-                                <i class="fas fa-check-circle text-success"></i>
-                                Entregue
-                              </a>
-                            </li>
-                            <li><hr class="dropdown-divider" /></li>
-                            <li>
-                              <a
-                                class="dropdown-item text-danger"
-                                href="#"
-                                th:onclick="'alterarStatus(' + ${pedido.id} + ', \'CANCELADO\')'"
-                              >
-                                <i class="fas fa-times text-danger"></i>
-                                Cancelado
-                              </a>
-                            </li>
-                          </ul>
-                        </div>
-
-                        <!-- Botão Excluir -->
-                        <button
-                          class="btn btn-outline-danger btn-sm"
-                          th:onclick="'confirmarExclusao(' + ${pedido.id} + ')'"
-                          title="Excluir"
-                        >
-                          <i class="fas fa-trash"></i>
-                        </button>
                       </td>
                     </tr>
                   </tbody>
@@ -366,71 +287,8 @@
       </div>
     </div>
 
-    <!-- Modal de Confirmação de Exclusão -->
-    <div class="modal fade" id="modalExclusao" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">
-              <i class="fas fa-exclamation-triangle me-2"></i>
-              Confirmar Exclusão
-            </h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-            ></button>
-          </div>
-          <div class="modal-body">
-            <p>Tem certeza que deseja excluir este pedido?</p>
-            <p class="text-danger">
-              <strong>Esta ação não pode ser desfeita!</strong>
-            </p>
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-bs-dismiss="modal"
-            >
-              <i class="fas fa-times"></i> Cancelar
-            </button>
-            <form id="formExclusao" method="post" style="display: inline">
-              <button type="submit" class="btn btn-danger">
-                <i class="fas fa-trash"></i> Excluir
-              </button>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Form oculto para alterar status -->
-    <form id="formAlterarStatus" method="post" style="display: none">
-      <input type="hidden" name="novoStatus" id="novoStatus" />
-    </form>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-      // Confirmar exclusão
-      function confirmarExclusao(pedidoId) {
-        const form = document.getElementById("formExclusao");
-        form.action = `/admin/pedidos/${pedidoId}/excluir`;
-
-        const modal = new bootstrap.Modal(
-          document.getElementById("modalExclusao")
-        );
-        modal.show();
-      }
-
-      // Alterar status
-      function alterarStatus(pedidoId, novoStatus) {
-        const form = document.getElementById("formAlterarStatus");
-        form.action = `/admin/pedidos/${pedidoId}/status`;
-        document.getElementById("novoStatus").value = novoStatus;
-        form.submit();
-      }
-
       // Filtrar pedidos
       function filtrarPedidos() {
         const statusFiltro = document
