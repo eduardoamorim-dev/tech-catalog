@@ -36,4 +36,11 @@ public class User {
   @Column(name = "user_role")
   private List<String> roles;
   
+  public void setUsername(String username) {
+      this.name = username;
+  }
+
+  public String getUsername() {
+    return name;
+  }
 }
