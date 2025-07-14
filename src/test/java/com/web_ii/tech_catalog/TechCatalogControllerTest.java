@@ -78,7 +78,7 @@ public class TechCatalogControllerTest {
             .andExpect(status().isOk())
             .andExpect(view().name("techcatalog/index"))
             .andExpect(model().attributeExists("eletronicosList"))
-            .andExpect(content().string(containsString("Listagem de Eletrônicos")))
+            .andExpect(content().string(containsString("Loja de Eletrônicos")))
             .andExpect(content().string(containsString("Produto B")));
     }
 
