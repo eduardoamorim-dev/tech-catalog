@@ -33,8 +33,13 @@ public class SecurityConfig {
 		http.authorizeHttpRequests(requests -> requests
 				.requestMatchers("/", "/home", "/register", "/saveUser", 
 					"/register-initial-admin", "/saveInitialAdmin").permitAll()
+				// Rotas apenas para Admin
+				.requestMatchers("/admin/**").hasAuthority("Admin")
 				.requestMatchers("/techcatalog/*").hasAuthority("Admin")
-				.requestMatchers("/carrinho/*").not().hasAuthority("Admin")
+				
+				// Rotas apenas para usuários comuns (não admin)
+				.requestMatchers("/carrinho/**").hasAuthority("user")
+				.requestMatchers("/pedidos/**").hasAuthority("user")
 				.anyRequest().authenticated())
 			.formLogin(login -> login
 				.successHandler(customSuccessHandler)) // redirecionamento customizado
