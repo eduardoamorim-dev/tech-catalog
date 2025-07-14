@@ -114,4 +114,12 @@ public class UserServiceImpl implements IUserService, UserDetailsService {
 
         return springUser;
     }
+
+    @Override
+    public boolean hasAdminUser() {
+        List<User> allUsers = userRepo.findAll();
+        return allUsers.stream()
+                .anyMatch(user -> user.getRoles() != null && 
+                        user.getRoles().contains("Admin"));
+    }
 }

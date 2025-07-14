@@ -14,9 +14,12 @@ public interface IUserService {
     
     Optional<User> getUserById(Integer id);
 
-	Optional<User> findUserById(Long id);
-	
+    Optional<User> findUserById(Long id);
+    
     void updateUser(User user, String newPassword);
     
     void deleteUser(Integer id);
+    
+    // Novo método para verificar se existe pelo menos um admin
+    boolean hasAdminUser();
 }

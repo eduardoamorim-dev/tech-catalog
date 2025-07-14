@@ -20,6 +20,35 @@ public class UserController {
 
     @Autowired
     private IUserService userService;
+    
+    // Página inicial - verifica se existe admin
+    @GetMapping("/")
+    public String home(Model model) {
+        // Verifica se existe pelo menos um usuário com role Admin
+        boolean hasAdmin = userService.hasAdminUser();
+        
+        if (!hasAdmin) {
+            // Se não há admin, redireciona para a página de registro de admin
+            return "redirect:/register-initial-admin";
+        }
+        
+        // Se há admin, mostra a página inicial normal
+        return "home";
+    }
+    
+    @GetMapping("/register-initial-admin")
+    public String registerInitialAdmin(Model model) {
+        // Verifica novamente se realmente não há admin (segurança)
+        boolean hasAdmin = userService.hasAdminUser();
+        
+        if (hasAdmin) {
+            // Se já existe admin, redireciona para home
+            return "redirect:/";
+        }
+        
+        model.addAttribute("isInitialAdmin", true);
+        return "user/registerInitialAdmin";
+    }
 
     // Go to Registration Page
     @GetMapping("/register")
@@ -50,6 +79,28 @@ public class UserController {
         String message = "Usuário '" + user.getName() + "' registrado com sucesso!";
         model.addAttribute("msg", message);
         return "user/registerAdmin";
+    }
+    
+    // Novo método para salvar o primeiro admin do sistema
+    @PostMapping("/saveInitialAdmin")
+    public String saveInitialAdmin(@ModelAttribute User user, Model model) {
+        // Verifica se realmente não há admin (segurança)
+        boolean hasAdmin = userService.hasAdminUser();
+        
+        if (hasAdmin) {
+            // Se já existe admin, redireciona para home
+            return "redirect:/";
+        }
+        
+        // Define automaticamente o role como Admin
+        user.setRoles(Arrays.asList("Admin"));
+        
+        Integer id = userService.saveUser(user);
+        String message = "Primeiro administrador '" + user.getName() + "' criado com sucesso!";
+        model.addAttribute("msg", message);
+        model.addAttribute("isInitialAdmin", true);
+        model.addAttribute("success", true);
+        return "user/registerInitialAdmin";
     }
 
     // Listar todos os usuários (apenas para Admin)
